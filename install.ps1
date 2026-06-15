@@ -57,9 +57,9 @@ function Install-VexTools {
         "  $SkillsDest"
         ""
         "Would copy:"
-        "  tools/vex-skill-gen.py -> $ToolsDest/"
-        "  tools/vex-cost.py      -> $ToolsDest/"
-        "  tools/vex-memory.py    -> $ToolsDest/"
+        "  tools/vex_skill_gen.py -> $ToolsDest/"
+        "  tools/vex_cost.py      -> $ToolsDest/"
+        "  tools/vex_memory.py    -> $ToolsDest/"
         "  config/stacks.json     -> $ConfigDest/"
         "  config/models.json     -> $ConfigDest/"
         ""
@@ -67,9 +67,9 @@ function Install-VexTools {
         "  $ToolsDest"
         ""
         "Would create batch wrappers:"
-        "  $ToolsDest/vex-skill-gen.cmd"
-        "  $ToolsDest/vex-cost.cmd"
-        "  $ToolsDest/vex-memory.cmd"
+        "  $ToolsDest/vex_skill_gen.cmd"
+        "  $ToolsDest/vex_cost.cmd"
+        "  $ToolsDest/vex_memory.cmd"
         return
     }
 
@@ -79,16 +79,18 @@ function Install-VexTools {
     New-Item -ItemType Directory -Force -Path $SkillsDest | Out-Null
 
     # Copy tools
-    Copy-Item (Join-Path $ScriptDir "tools\vex-skill-gen.py") $ToolsDest -Force
-    Copy-Item (Join-Path $ScriptDir "tools\vex-cost.py") $ToolsDest -Force
-    Copy-Item (Join-Path $ScriptDir "tools\vex-memory.py") $ToolsDest -Force
+    Copy-Item (Join-Path $ScriptDir "tools\vex_skill_gen.py") $ToolsDest -Force
+    Copy-Item (Join-Path $ScriptDir "tools\vex_cost.py") $ToolsDest -Force
+    Copy-Item (Join-Path $ScriptDir "tools\vex_memory.py") $ToolsDest -Force
 
     # Copy config
+    Backup-File (Join-Path $ConfigDest "stacks.json")
     Copy-Item (Join-Path $ScriptDir "config\stacks.json") $ConfigDest -Force
+    Backup-File (Join-Path $ConfigDest "models.json")
     Copy-Item (Join-Path $ScriptDir "config\models.json") $ConfigDest -Force
 
     # Create batch wrapper scripts
-    $tools = @("vex-skill-gen", "vex-cost", "vex-memory")
+    $tools = @("vex_skill_gen", "vex_cost", "vex_memory")
     foreach ($tool in $tools) {
         $cmdPath = Join-Path $ToolsDest "$tool.cmd"
         $pyFile = Join-Path $ToolsDest "$tool.py"
@@ -132,13 +134,13 @@ python "$pyFile" @args
     "  Profile:   $Profile"
     ""
     "  Quick start (restart terminal first):"
-    "    vex-skill-gen scan          # Scan sessions for patterns"
-    "    vex-cost report             # View cost report"
-    "    vex-memory scan             # Build knowledge graph"
-    "    vex-cost models             # View model pricing"
+    "    vex_skill_gen scan          # Scan sessions for patterns"
+    "    vex_cost report             # View cost report"
+    "    vex_memory scan             # Build knowledge graph"
+    "    vex_cost models             # View model pricing"
     ""
     "  Or run directly:"
-    "    python $ToolsDest\vex-skill-gen.py scan"
+    "    python $ToolsDest\vex_skill_gen.py scan"
 }
 
 function Uninstall-VexTools {

@@ -31,6 +31,6 @@ Repository = "https://github.com/rapoii/vex"
 Issues = "https://github.com/rapoii/vex/issues"
 
 [project.scripts]
-vex-skill-gen = "tools.vex_skill_gen:main"
-vex-cost = "tools.vex_cost:main"
-vex-memory = "tools.vex_memory:main"
+vex_skill_gen = "tools.vex_skill_gen:main"
+vex_cost = "tools.vex_cost:main"
+vex_memory = "tools.vex_memory:main"

@@ -2,12 +2,12 @@
 """VEX Cost Tracker — Cost tracking and analytics for Claude Code sessions.
 
 Usage:
-    python vex-cost.py report [--days N] [--project NAME]
-    python vex-cost.py budget set --amount AMOUNT [--period daily|monthly]
-    python vex-cost.py budget status
-    python vex-cost.py track [--session FILE]
-    python vex-cost.py models
-    python vex-cost.py export [--format csv|json] [--output FILE]
+    python vex_cost.py report [--days N] [--project NAME]
+    python vex_cost.py budget set --amount AMOUNT [--period daily|monthly]
+    python vex_cost.py budget status
+    python vex_cost.py track [--session FILE]
+    python vex_cost.py models
+    python vex_cost.py export [--format csv|json] [--output FILE]
 """
 
 import argparse

@@ -1,48 +1,86 @@
 ---
-    name: bug-fix-flow
-    description: Reproduce, isolate, patch, and verify defects without speculative rewrites.
-    argument-hint: "[scope | file | goal]"
-    metadata:
-      origin: VEX
-      category: workflow
-      triggers: ["Failing test or user-reported defect", "Production regression", "Unclear runtime error"]
-    ---
+name: bug-fix-flow
+description: Reproduce, isolate, patch, and verify defects without speculative rewrites.
+argument-hint: "[scope | file | goal]"
+metadata:
+  origin: VEX
+  category: workflow
+  triggers: ["Failing test or user-reported defect", "Production regression", "Unclear runtime error"]
+---
 
-    # Bug Fix Flow
+# Bug Fix Flow
 
-    Reproduce, isolate, patch, and verify defects without speculative rewrites.
+A systematic approach to debugging and fixing issues without causing regressions.
 
-    ## When to Activate
+## When to Activate
 
-    - Failing test or user-reported defect
-- Production regression
-- Unclear runtime error
+- A test is failing.
+- A user reported a defect.
+- A production error occurred.
+- Unexpected runtime behavior is observed.
 
-    ## How It Works
+## The Bug Fix Cycle
 
-    1. Clarify scope and success criteria before changing files.
-    2. Inspect existing project conventions and reuse local tooling first.
-    3. Apply smallest safe change that satisfies requirement.
-    4. Validate with targeted commands, tests, or manual checks.
-    5. Report result with changed paths, evidence, and remaining risk.
+### Step 1: Reproduce
 
-    ## Examples
+Do not touch code until you can reliably reproduce the error.
 
-    - `/bug-fix-flow src/api` — apply workflow to specific path.
-    - `/bug-fix-flow failing checkout test` — focus on named issue.
-    - `/bug-fix-flow` — infer scope from current diff or task.
+1. **Gather Information**: What is the expected behavior? What is the actual behavior? What are the steps to reproduce? What environment?
+2. **Write a Failing Test (TDD)**: If possible, write an automated test that captures the bug. This proves the bug exists and proves your fix works later.
+   - *Example*: If sorting is broken, write `expect(sort([3, 1, 2])).toEqual([1, 2, 3])`. It should fail.
 
-    ## Critical Callouts
+### Step 2: Isolate
 
-    - Do not bypass failing quality gates; fix root cause.
-    - Prefer project-owned scripts over remote one-off commands.
-    - Validate external input, secrets, and shared-state changes carefully.
-    - Stop and ask before destructive or externally visible actions.
+Narrow down the location of the bug.
 
-    ## Related Skills
+1. **Read the Stack Trace**: Identify the exact file and line number where the error originates.
+2. **Trace the Data Flow**: Follow variables backwards from the crash point to see where bad data entered.
+3. **Use Binary Search**: If a long block of code is failing, comment out halves to find the culprit.
+4. **Inspect State**: Use logging (`console.log`, `print()`) or a debugger to check variable values right before the failure.
 
-    - `tdd-workflow`
-- `code-review-flow`
-- `feature-development`
-- `pr-workflow`
+### Step 3: Root Cause Analysis
 
+Ask *why* it failed, not just *how* to make the error go away.
+
+- **Bad**: "It crashed because `user` is null. I'll add `if (!user) return;`." (This might mask a deeper issue where `user` *shouldn't* be null).
+- **Good**: "It crashed because `user` is null. Why is it null? Because the DB query failed silently. I need to handle the DB error."
+
+### Step 4: Patch
+
+Apply the smallest, safest fix.
+
+- Do not refactor unrelated code while fixing a bug.
+- Fix the root cause, not the symptom.
+- Ensure the fix doesn't break other features (run existing test suite).
+
+### Step 5: Verify
+
+Prove the fix works.
+
+1. **Run the Reproducer Test**: The failing test from Step 1 should now pass.
+2. **Run the Full Test Suite**: Ensure no regressions were introduced.
+3. **Manual Check**: If it's a UI bug, run the app and click through the scenario manually.
+
+## Common Pitfalls
+
+- **Shotgun Debugging**: Making random changes hoping it works. This breaks things.
+- **Masking Symptoms**: Catching an exception and doing nothing (`try { ... } catch (e) {}`), or adding null checks without understanding why data is null.
+- **Feature Creep**: Sneaking in new features or major refactors during a bug fix PR. Keep it focused.
+- **Ignoring Edge Cases**: Fixing the bug for the specific reported scenario but ignoring similar scenarios.
+
+## Language/Domain Specific Guidance
+
+### Web/Frontend
+- Check browser console for errors.
+- Check Network tab for failed API requests or malformed responses.
+- Use React/Vue devtools to inspect component state.
+
+### Backend/API
+- Check server logs.
+- Verify request payload and headers.
+- Check database state (did the record actually save?).
+
+### Build/Config
+- Clear caches (`rm -rf node_modules/.cache`, etc).
+- Check environment variables.
+- Verify dependency versions.

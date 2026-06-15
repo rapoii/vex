@@ -2,11 +2,11 @@
 """VEX Memory — Cross-project knowledge graph for Claude Code sessions.
 
 Usage:
-    python vex-memory.py scan [--project NAME] [--rebuild]
-    python vex-memory.py search QUERY [--type file|pattern|solution] [--limit N]
-    python vex-memory.py context [--file PATH] [--project NAME]
-    python vex-memory.py export [--format json|dot] [--output FILE]
-    python vex-memory.py stats
+    python vex_memory.py scan [--project NAME] [--rebuild]
+    python vex_memory.py search QUERY [--type file|pattern|solution] [--limit N]
+    python vex_memory.py context [--file PATH] [--project NAME]
+    python vex_memory.py export [--format json|dot] [--output FILE]
+    python vex_memory.py stats
 """
 
 import argparse

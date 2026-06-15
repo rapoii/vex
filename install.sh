@@ -71,9 +71,9 @@ do_install() {
         echo "  $SKILLS_DEST"
         echo ""
         echo "Would copy:"
-        echo "  tools/vex-skill-gen.py -> $TOOLS_DEST/"
-        echo "  tools/vex-cost.py      -> $TOOLS_DEST/"
-        echo "  tools/vex-memory.py    -> $TOOLS_DEST/"
+        echo "  tools/vex_skill_gen.py -> $TOOLS_DEST/"
+        echo "  tools/vex_cost.py      -> $TOOLS_DEST/"
+        echo "  tools/vex_memory.py    -> $TOOLS_DEST/"
         echo "  config/stacks.json     -> $CONFIG_DEST/"
         echo "  config/models.json     -> $CONFIG_DEST/"
         echo ""
@@ -81,9 +81,9 @@ do_install() {
         echo "  $TOOLS_DEST"
         echo ""
         echo "Would create wrapper scripts at:"
-        echo "  $TOOLS_DEST/vex-skill-gen"
-        echo "  $TOOLS_DEST/vex-cost"
-        echo "  $TOOLS_DEST/vex-memory"
+        echo "  $TOOLS_DEST/vex_skill_gen"
+        echo "  $TOOLS_DEST/vex_cost"
+        echo "  $TOOLS_DEST/vex_memory"
         return 0
     fi
 
@@ -91,16 +91,21 @@ do_install() {
     mkdir -p "$TOOLS_DEST" "$CONFIG_DEST" "$SKILLS_DEST"
 
     # Copy tools
-    cp "$SCRIPT_DIR/tools/vex-skill-gen.py" "$TOOLS_DEST/"
-    cp "$SCRIPT_DIR/tools/vex-cost.py" "$TOOLS_DEST/"
-    cp "$SCRIPT_DIR/tools/vex-memory.py" "$TOOLS_DEST/"
+    backup_file "$TOOLS_DEST/vex_skill_gen.py"
+    cp "$SCRIPT_DIR/tools/vex_skill_gen.py" "$TOOLS_DEST/"
+    backup_file "$TOOLS_DEST/vex_cost.py"
+    cp "$SCRIPT_DIR/tools/vex_cost.py" "$TOOLS_DEST/"
+    backup_file "$TOOLS_DEST/vex_memory.py"
+    cp "$SCRIPT_DIR/tools/vex_memory.py" "$TOOLS_DEST/"
 
     # Copy config
-    cp "$SCRIPT_DIR/config/stacks.json" "$CONFIG_DEST/"
-    cp "$SCRIPT_DIR/config/models.json" "$CONFIG_DEST/"
+    backup_file "$CONFIG_DEST/stacks.json"
+cp "$SCRIPT_DIR/config/stacks.json" "$CONFIG_DEST/"
+    backup_file "$CONFIG_DEST/models.json"
+cp "$SCRIPT_DIR/config/models.json" "$CONFIG_DEST/"
 
     # Create wrapper scripts
-    for tool in vex-skill-gen vex-cost vex-memory; do
+    for tool in vex_skill_gen vex_cost vex_memory; do
         cat > "$TOOLS_DEST/$tool" <<WRAPPER
 #!/usr/bin/env bash
 exec python3 "$TOOLS_DEST/${tool}.py" "\$@"
@@ -134,7 +139,7 @@ PATH
 
     # Create symlink for current session
     if [[ -d "/usr/local/bin" ]] && [[ -w "/usr/local/bin" ]]; then
-        for tool in vex-skill-gen vex-cost vex-memory; do
+        for tool in vex_skill_gen vex_cost vex_memory; do
             ln -sf "$TOOLS_DEST/$tool" "/usr/local/bin/$tool" 2>/dev/null || true
         done
     fi
@@ -147,10 +152,10 @@ PATH
     echo "  Profile:   $PROFILE"
     echo ""
     echo "  Quick start:"
-    echo "    vex-skill-gen scan          # Scan sessions for patterns"
-    echo "    vex-cost report             # View cost report"
-    echo "    vex-memory scan             # Build knowledge graph"
-    echo "    vex-cost models             # View model pricing"
+    echo "    vex_skill_gen scan          # Scan sessions for patterns"
+    echo "    vex_cost report             # View cost report"
+    echo "    vex_memory scan             # Build knowledge graph"
+    echo "    vex_cost models             # View model pricing"
     echo ""
     echo "  Add to current shell:"
     echo "    export PATH=\"$TOOLS_DEST:\$PATH\""
@@ -177,7 +182,7 @@ do_uninstall() {
     fi
 
     # Remove symlinks
-    for tool in vex-skill-gen vex-cost vex-memory; do
+    for tool in vex_skill_gen vex_cost vex_memory; do
         if [[ -L "/usr/local/bin/$tool" ]]; then
             rm -f "/usr/local/bin/$tool"
             ok "Removed /usr/local/bin/$tool"

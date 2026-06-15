@@ -1,5 +1,6 @@
 import argparse
 import json
+import hashlib
 import os
 import urllib.request
 import urllib.error
@@ -42,11 +43,42 @@ def install(args):
         os.makedirs(target_dir, exist_ok=True)
         manifest_path = os.path.join(target_dir, "manifest.json")
         
-        # Download mock or real. If network fails, handle gracefully
+        # Security validation: URL allowlist
+        if not skill['install_url'].startswith('https://raw.githubusercontent.com/rapoii/vex/'):
+            print(f"SECURITY BLOCKED: URL not in allowlist: {skill['install_url']}")
+            return
+            
         req = urllib.request.Request(skill['install_url'], headers={'User-Agent': 'VEX-Installer/1.0'})
         try:
             with urllib.request.urlopen(req) as response:
-                content = response.read().decode('utf-8')
+                # Security validation: Content-Type
+                content_type = response.headers.get('Content-Type', '')
+                if 'text/plain' not in content_type and 'application/json' not in content_type:
+                    print(f"SECURITY BLOCKED: Invalid Content-Type: {content_type}")
+                    return
+                    
+                # Security validation: Max size (1MB) and Hash check
+                MAX_SIZE = 1024 * 1024
+                downloaded_data = bytearray()
+                hasher = hashlib.sha256()
+                
+                while True:
+                    chunk = response.read(8192)
+                    if not chunk:
+                        break
+                    downloaded_data.extend(chunk)
+                    hasher.update(chunk)
+                    if len(downloaded_data) > MAX_SIZE:
+                        print(f"SECURITY BLOCKED: File exceeds {MAX_SIZE} bytes")
+                        return
+                
+                # Check hash if provided
+                expected_hash = skill.get('hash')
+                if expected_hash and hasher.hexdigest() != expected_hash:
+                    print(f"SECURITY BLOCKED: Hash mismatch. Expected {expected_hash}, got {hasher.hexdigest()}")
+                    return
+                    
+                content = downloaded_data.decode('utf-8')
                 with open(manifest_path, "w") as f:
                     f.write(content)
             print(f"Success! {args.skill_name} installed to {target_dir}")

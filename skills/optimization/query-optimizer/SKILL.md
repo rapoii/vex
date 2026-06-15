@@ -1,48 +1,54 @@
 ---
-    name: query-optimizer
-    description: Improve database queries with indexes, plans, batching, pagination, and transaction scope.
-    argument-hint: "[scope | file | goal]"
-    metadata:
-      origin: VEX
-      category: optimization
-      triggers: ["Slow query", "N+1 issue", "Database performance"]
-    ---
+name: query-optimizer
+description: Implement concrete workflows and best practices for query-optimizer.
+argument-hint: "[scope | target]"
+metadata:
+  origin: VEX
+---
 
-    # Query Optimizer
+# query-optimizer
 
-    Improve database queries with indexes, plans, batching, pagination, and transaction scope.
+Actionable steps and concrete examples for query-optimizer.
 
-    ## When to Activate
+## When to Activate
+- Task involves query optimizer.
+- Reviewing or optimizing related code.
 
-    - Slow query
-- N+1 issue
-- Database performance
+## Core Principles
+1. **Be specific**: Apply targeted changes rather than broad rewrites.
+2. **Verify locally**: Always test changes before committing.
+3. **Follow standards**: Adhere to established patterns for the domain.
 
-    ## How It Works
+## Actionable Steps
+1. **Analyze**: Use `grep` or code search to find relevant files.
+2. **Execute**: Apply the specific pattern or fix.
+3. **Validate**: Run tests, linters, or manual checks to confirm correctness.
 
-    1. Clarify scope and success criteria before changing files.
-    2. Inspect existing project conventions and reuse local tooling first.
-    3. Apply smallest safe change that satisfies requirement.
-    4. Validate with targeted commands, tests, or manual checks.
-    5. Report result with changed paths, evidence, and remaining risk.
+## Code Examples
 
-    ## Examples
+### Pattern 1
+```javascript
+// Example implementation
+function process(data) {
+  // Validate input
+  if (!data) return null;
+  // Execute logic
+  return data.map(item => item.id);
+}
+```
 
-    - `/query-optimizer src/api` — apply workflow to specific path.
-    - `/query-optimizer failing checkout test` — focus on named issue.
-    - `/query-optimizer` — infer scope from current diff or task.
+### Verification Command
+```bash
+# Run tests for this specific module
+npm test -- query-optimizer
+```
 
-    ## Critical Callouts
+## Common Pitfalls
+- Skipping validation steps.
+- Applying patterns where they don't fit the architecture.
+- Ignoring edge cases.
 
-    - Do not bypass failing quality gates; fix root cause.
-    - Prefer project-owned scripts over remote one-off commands.
-    - Validate external input, secrets, and shared-state changes carefully.
-    - Stop and ask before destructive or externally visible actions.
-
-    ## Related Skills
-
-    - `token-budget-advisor`
-- `model-routing-optimizer`
-- `context-window-manager`
-- `performance-audit`
-
+## Verification Checklist
+- [ ] Code compiles/builds successfully.
+- [ ] Tests cover the new/modified logic.
+- [ ] No regression in related modules.

@@ -7,7 +7,7 @@
       "category": "automation",
       "downloads": 100,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/ci-cd-setup/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/automation/ci-cd-setup/manifest.json"
     },
     {
       "name": "docker-compose",
@@ -16,7 +16,7 @@
       "category": "automation",
       "downloads": 110,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/docker-compose/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/automation/docker-compose/manifest.json"
     },
     {
       "name": "github-actions",
@@ -25,7 +25,7 @@
       "category": "automation",
       "downloads": 120,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/github-actions/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/automation/github-actions/manifest.json"
     },
     {
       "name": "pre-commit-hooks",
@@ -34,7 +34,7 @@
       "category": "automation",
       "downloads": 130,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/pre-commit-hooks/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/automation/pre-commit-hooks/manifest.json"
     },
     {
       "name": "release-automation",
@@ -43,7 +43,7 @@
       "category": "automation",
       "downloads": 140,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/release-automation/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/automation/release-automation/manifest.json"
     },
     {
       "name": "test-automation",
@@ -52,7 +52,7 @@
       "category": "automation",
       "downloads": 150,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/test-automation/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/automation/test-automation/manifest.json"
     },
     {
       "name": "bundle-optimizer",
@@ -61,7 +61,7 @@
       "category": "optimization",
       "downloads": 160,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/bundle-optimizer/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/optimization/bundle-optimizer/manifest.json"
     },
     {
       "name": "context-window-manager",
@@ -70,7 +70,7 @@
       "category": "optimization",
       "downloads": 170,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/context-window-manager/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/optimization/context-window-manager/manifest.json"
     },
     {
       "name": "model-routing-optimizer",
@@ -79,7 +79,7 @@
       "category": "optimization",
       "downloads": 180,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/model-routing-optimizer/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/optimization/model-routing-optimizer/manifest.json"
     },
     {
       "name": "performance-audit",
@@ -88,7 +88,7 @@
       "category": "optimization",
       "downloads": 190,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/performance-audit/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/optimization/performance-audit/manifest.json"
     },
     {
       "name": "query-optimizer",
@@ -97,7 +97,7 @@
       "category": "optimization",
       "downloads": 200,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/query-optimizer/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/optimization/query-optimizer/manifest.json"
     },
     {
       "name": "token-budget-advisor",
@@ -106,7 +106,7 @@
       "category": "optimization",
       "downloads": 210,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/token-budget-advisor/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/optimization/token-budget-advisor/manifest.json"
     },
     {
       "name": "database-patterns",
@@ -115,7 +115,7 @@
       "category": "reference",
       "downloads": 220,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/database-patterns/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/reference/database-patterns/manifest.json"
     },
     {
       "name": "django-patterns",
@@ -124,7 +124,7 @@
       "category": "reference",
       "downloads": 230,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/django-patterns/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/reference/django-patterns/manifest.json"
     },
     {
       "name": "docker-patterns",
@@ -133,7 +133,7 @@
       "category": "reference",
       "downloads": 240,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/docker-patterns/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/reference/docker-patterns/manifest.json"
     },
     {
       "name": "fastapi-patterns",
@@ -142,7 +142,7 @@
       "category": "reference",
       "downloads": 250,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/fastapi-patterns/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/reference/fastapi-patterns/manifest.json"
     },
     {
       "name": "python-patterns",
@@ -151,7 +151,7 @@
       "category": "reference",
       "downloads": 260,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/python-patterns/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/reference/python-patterns/manifest.json"
     },
     {
       "name": "react-patterns",
@@ -160,7 +160,7 @@
       "category": "reference",
       "downloads": 270,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/react-patterns/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/reference/react-patterns/manifest.json"
     },
     {
       "name": "typescript-patterns",
@@ -169,7 +169,7 @@
       "category": "reference",
       "downloads": 280,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/typescript-patterns/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/reference/typescript-patterns/manifest.json"
     },
     {
       "name": "vue-patterns",
@@ -178,7 +178,7 @@
       "category": "reference",
       "downloads": 290,
       "rating": 4.5,
-      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/vue-patterns/manifest.json"
+      "install_url": "https://raw.githubusercontent.com/rapoii/vex/main/skills/reference/vue-patterns/manifest.json"
     }
   ]
 }

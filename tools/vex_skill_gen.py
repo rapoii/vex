@@ -2,10 +2,10 @@
 """VEX Skill Generator — Auto-generate skills from Claude Code session patterns.
 
 Usage:
-    python vex-skill-gen.py scan [--project NAME] [--min-occurrences N]
-    python vex-skill-gen.py generate [--project NAME] [--output DIR]
-    python vex-skill-gen.py install [--skill PATH] [--target DIR]
-    python vex-skill-gen.py list [--score-min N]
+    python vex_skill_gen.py scan [--project NAME] [--min-occurrences N]
+    python vex_skill_gen.py generate [--project NAME] [--output DIR]
+    python vex_skill_gen.py install [--skill PATH] [--target DIR]
+    python vex_skill_gen.py list [--score-min N]
 """
 
 import argparse
@@ -228,7 +228,7 @@ version: 1.0.0
 category: {category}
 score: {score}
 auto_generated: true
-source: vex-skill-gen
+source: vex_skill_gen
 project: {project_name}
 generated: {datetime.now().isoformat()}
 ---"""

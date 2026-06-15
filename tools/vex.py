@@ -13,11 +13,11 @@ TOOLS_DIR = Path(__file__).parent.resolve()
 REPO_ROOT = TOOLS_DIR.parent.resolve()
 
 COMMAND_MAP = {
-    "skill": ("python", TOOLS_DIR / "vex-skill-gen.py"),
-    "scan": ("python", TOOLS_DIR / "vex-skill-gen.py", "scan"),
-    "generate": ("python", TOOLS_DIR / "vex-skill-gen.py", "generate"),
-    "cost": ("python", TOOLS_DIR / "vex-cost.py"),
-    "memory": ("python", TOOLS_DIR / "vex-memory.py"),
+    "skill": ("python", TOOLS_DIR / "vex_skill_gen.py"),
+    "scan": ("python", TOOLS_DIR / "vex_skill_gen.py", "scan"),
+    "generate": ("python", TOOLS_DIR / "vex_skill_gen.py", "generate"),
+    "cost": ("python", TOOLS_DIR / "vex_cost.py"),
+    "memory": ("python", TOOLS_DIR / "vex_memory.py"),
     "dashboard": ("python", REPO_ROOT / "dashboard" / "server.py"),
     "install": ("bash", REPO_ROOT / "install.sh"),
 }

@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import secrets
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -273,6 +274,37 @@ def get_health() -> HealthStatus:
 # Flask App
 def create_app():
     app = Flask(__name__)
+
+# Generate auth token
+AUTH_TOKEN = secrets.token_urlsafe(16)
+print(f"
+{'='*50}")
+print(f"VEX Dashboard running!")
+print(f"Access token: {AUTH_TOKEN}")
+print(f"Use ?token={AUTH_TOKEN} or Authorization header")
+print(f"{'='*50}
+")
+
+def check_auth():
+    # Allow static files without auth
+    if request.path.startswith('/static/'):
+        return None
+        
+    token = request.args.get('token')
+    auth_header = request.headers.get('Authorization')
+    
+    if token == AUTH_TOKEN:
+        return None
+    
+    if auth_header and auth_header.startswith('Bearer ') and auth_header.split(' ')[1] == AUTH_TOKEN:
+        return None
+        
+    return jsonify({"error": "Unauthorized"}), 401
+
+@app.before_request
+def enforce_auth():
+    return check_auth()
+
 
     @app.after_request
     def add_headers(response):

@@ -1,4 +1,6 @@
----
+const fs = require('fs');
+
+const content = `---
 name: pr-workflow
 description: Standardized workflow for reviewing, testing, and creating pull requests.
 argument-hint: "[branch | pr-url]"
@@ -20,7 +22,7 @@ Actionable steps for creating and reviewing Pull Requests securely and thoroughl
 
 ### 1. Preparation & Self-Review
 Before opening a PR, ensure local quality.
-```bash
+\`\`\`bash
 # 1. Update with target branch
 git fetch origin main
 git rebase origin/main
@@ -29,25 +31,25 @@ git rebase origin/main
 npm run lint
 npm run test
 npm run build
-```
+\`\`\`
 
 ### 2. Crafting the PR
 Write a clear, descriptive PR body. Explain the *why*, not just the *what*.
 
 **PR Template Structure:**
-```markdown
+\`\`\`markdown
 ## Summary
 Fixes bug where checkout button was disabled for guest users.
 
 ## Changes
-- Updated `CheckoutFlow.tsx` to allow null user ID.
-- Added `GuestCheckout.test.tsx`.
+- Updated \`CheckoutFlow.tsx\` to allow null user ID.
+- Added \`GuestCheckout.test.tsx\`.
 
 ## Verification Steps
 1. Log out.
 2. Add item to cart.
 3. Click Checkout. Verify modal opens.
-```
+\`\`\`
 
 ### 3. Reviewing a PR (Reviewer)
 Use a systematic approach to review code.
@@ -61,10 +63,10 @@ Use a systematic approach to review code.
 ### 4. Merging
 Prefer Squash and Merge for cleaner history.
 
-```bash
+\`\`\`bash
 # Example gh CLI command to merge
 gh pr merge --squash --delete-branch
-```
+\`\`\`
 
 ## Common Pitfalls
 - **Massive PRs**: Opening PRs with 1000+ lines of changes. Break them down.
@@ -76,3 +78,7 @@ gh pr merge --squash --delete-branch
 - [ ] No merge conflicts.
 - [ ] All requested changes addressed.
 - [ ] Test coverage maintained or improved.
+`;
+
+fs.writeFileSync('C:/Users/rafi/vex-project/skills/workflow/pr-workflow/SKILL.md', content);
+console.log('Updated pr-workflow');

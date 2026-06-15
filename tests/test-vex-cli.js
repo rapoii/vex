@@ -51,7 +51,7 @@ test('scan wrapper propagates extra args', () => {
   // Pass an invalid flag to scan, should see it propagated to the sub-script
   const result = runVex(['scan', '--invalid-flag-for-test']);
   assert.notStrictEqual(result.status, 0, 'Expected failure on invalid flag');
-  // Argparse in vex-skill-gen.py should catch it
+  // Argparse in vex_skill_gen.py should catch it
   assert.ok(result.stderr.includes('unrecognized arguments') || result.stderr.includes('invalid_flag'), 'Args not propagated');
 });
 

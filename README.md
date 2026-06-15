@@ -21,7 +21,7 @@ VEX is a free, MIT-licensed agent harness system for building, testing, routing,
 ## Install
 
 ```bash
-git clone https://github.com/vareva/vex.git
+git clone https://github.com/rapoii/vex.git
 cd vex
 npm install
 python -m pip install -e .
