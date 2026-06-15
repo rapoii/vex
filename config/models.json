@@ -1,0 +1,58 @@
+{
+  "version": "1.0.0",
+  "models": {
+    "claude-opus-4-6": {
+      "display_name": "Claude Opus 4",
+      "pricing": {
+        "input_per_million": 15.0,
+        "output_per_million": 75.0
+      },
+      "capabilities": ["architecture", "complex-reasoning", "long-context"],
+      "max_tokens": 32768,
+      "context_window": 200000
+    },
+    "claude-sonnet-4-6": {
+      "display_name": "Claude Sonnet 4",
+      "pricing": {
+        "input_per_million": 3.0,
+        "output_per_million": 15.0
+      },
+      "capabilities": ["coding", "analysis", "general"],
+      "max_tokens": 8192,
+      "context_window": 200000
+    },
+    "claude-haiku-3-5": {
+      "display_name": "Claude Haiku 3.5",
+      "pricing": {
+        "input_per_million": 0.25,
+        "output_per_million": 1.25
+      },
+      "capabilities": ["exploration", "classification", "quick-tasks"],
+      "max_tokens": 8192,
+      "context_window": 200000
+    }
+  },
+  "task_routing": {
+    "architecture": {
+      "model": "claude-opus-4-6",
+      "description": "System design, component boundaries, data flow, API contracts",
+      "keywords": ["design", "architect", "refactor", "migrate", "scale", "system"]
+    },
+    "coding": {
+      "model": "claude-sonnet-4-6",
+      "description": "Feature implementation, bug fixes, tests, code review",
+      "keywords": ["implement", "fix", "test", "write", "update", "add", "create"]
+    },
+    "exploration": {
+      "model": "claude-haiku-3-5",
+      "description": "Code search, classification, quick questions, triage",
+      "keywords": ["search", "find", "list", "check", "classify", "what", "where"]
+    }
+  },
+  "budget_defaults": {
+    "daily_limit_usd": 10.0,
+    "monthly_limit_usd": 100.0,
+    "alert_threshold_pct": 80,
+    "hard_limit": false
+  }
+}

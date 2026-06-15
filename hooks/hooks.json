@@ -1,0 +1,50 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python hooks/scripts/check-file-size.py",
+            "description": "Block oversized generated files"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python hooks/scripts/validate-frontmatter.py",
+            "description": "Validate markdown frontmatter after edits"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python hooks/scripts/session-summary.py",
+            "description": "Summarize VEX session status"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python hooks/scripts/session-start.py",
+            "description": "Show VEX toolkit context"
+          }
+        ]
+      }
+    ]
+  }
+}

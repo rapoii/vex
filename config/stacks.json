@@ -1,0 +1,305 @@
+{
+  "version": "1.0.0",
+  "stacks": {
+    "typescript": {
+      "name": "TypeScript",
+      "indicators": {
+        "files": ["tsconfig.json", "tslint.json", ".eslintrc.ts"],
+        "extensions": [".ts", ".tsx"],
+        "dependencies": ["typescript", "ts-node"]
+      },
+      "resources": {
+        "skills": ["typescript-strict", "type-guards", "module-resolution"],
+        "docs": ["https://www.typescriptlang.org/docs/"],
+        "linter": "eslint",
+        "formatter": "prettier"
+      },
+      "model_hint": "coding"
+    },
+    "python": {
+      "name": "Python",
+      "indicators": {
+        "files": ["pyproject.toml", "setup.py", "setup.cfg", "requirements.txt", "Pipfile"],
+        "extensions": [".py", ".pyi"],
+        "dependencies": ["python"]
+      },
+      "resources": {
+        "skills": ["python-venv", "pytest-patterns", "type-hints"],
+        "docs": ["https://docs.python.org/3/"],
+        "linter": "ruff",
+        "formatter": "black"
+      },
+      "model_hint": "coding"
+    },
+    "golang": {
+      "name": "Go",
+      "indicators": {
+        "files": ["go.mod", "go.sum"],
+        "extensions": [".go"],
+        "dependencies": ["go"]
+      },
+      "resources": {
+        "skills": ["go-idioms", "go-concurrency", "go-error-handling"],
+        "docs": ["https://go.dev/doc/"],
+        "linter": "golangci-lint",
+        "formatter": "gofmt"
+      },
+      "model_hint": "coding"
+    },
+    "java": {
+      "name": "Java",
+      "indicators": {
+        "files": ["pom.xml", "build.gradle", "build.gradle.kts"],
+        "extensions": [".java"],
+        "dependencies": ["java", "maven", "gradle"]
+      },
+      "resources": {
+        "skills": ["java-streams", "spring-boot", "junit-patterns"],
+        "docs": ["https://docs.oracle.com/en/java/"],
+        "linter": "checkstyle",
+        "formatter": "google-java-format"
+      },
+      "model_hint": "coding"
+    },
+    "rust": {
+      "name": "Rust",
+      "indicators": {
+        "files": ["Cargo.toml", "Cargo.lock"],
+        "extensions": [".rs"],
+        "dependencies": ["cargo", "rustc"]
+      },
+      "resources": {
+        "skills": ["rust-ownership", "rust-lifetimes", "rust-error-handling"],
+        "docs": ["https://doc.rust-lang.org/book/"],
+        "linter": "clippy",
+        "formatter": "rustfmt"
+      },
+      "model_hint": "coding"
+    },
+    "kotlin": {
+      "name": "Kotlin",
+      "indicators": {
+        "files": ["build.gradle.kts", "settings.gradle.kts"],
+        "extensions": [".kt", ".kts"],
+        "dependencies": ["kotlin"]
+      },
+      "resources": {
+        "skills": ["kotlin-coroutines", "kotlin-dsl", "ktor-patterns"],
+        "docs": ["https://kotlinlang.org/docs/"],
+        "linter": "ktlint",
+        "formatter": "ktlint"
+      },
+      "model_hint": "coding"
+    },
+    "cpp": {
+      "name": "C++",
+      "indicators": {
+        "files": ["CMakeLists.txt", "Makefile", "conanfile.txt", "vcpkg.json"],
+        "extensions": [".cpp", ".cc", ".cxx", ".hpp", ".h"],
+        "dependencies": ["cmake", "g++", "clang++"]
+      },
+      "resources": {
+        "skills": ["cpp-modern", "cpp-memory-management", "cpp-templates"],
+        "docs": ["https://en.cppreference.com/"],
+        "linter": "clang-tidy",
+        "formatter": "clang-format"
+      },
+      "model_hint": "architecture"
+    },
+    "csharp": {
+      "name": "C#",
+      "indicators": {
+        "files": ["*.csproj", "*.sln", "global.json", "nuget.config"],
+        "extensions": [".cs", ".csx"],
+        "dependencies": ["dotnet"]
+      },
+      "resources": {
+        "skills": ["csharp-linq", "csharp-async", "dotnet-patterns"],
+        "docs": ["https://learn.microsoft.com/en-us/dotnet/csharp/"],
+        "linter": "dotnet-format",
+        "formatter": "dotnet-format"
+      },
+      "model_hint": "coding"
+    },
+    "dart": {
+      "name": "Dart",
+      "indicators": {
+        "files": ["pubspec.yaml", "pubspec.lock", "analysis_options.yaml"],
+        "extensions": [".dart"],
+        "dependencies": ["dart", "flutter"]
+      },
+      "resources": {
+        "skills": ["flutter-widgets", "dart-null-safety", "riverpod-patterns"],
+        "docs": ["https://dart.dev/guides"],
+        "linter": "dart analyze",
+        "formatter": "dart format"
+      },
+      "model_hint": "coding"
+    },
+    "swift": {
+      "name": "Swift",
+      "indicators": {
+        "files": ["Package.swift", "*.xcodeproj", "*.xcworkspace"],
+        "extensions": [".swift"],
+        "dependencies": ["swift", "xcodebuild"]
+      },
+      "resources": {
+        "skills": ["swiftui-patterns", "swift-concurrency", "combine-framework"],
+        "docs": ["https://docs.swift.org/swift-book/"],
+        "linter": "swiftlint",
+        "formatter": "swiftformat"
+      },
+      "model_hint": "coding"
+    },
+    "php": {
+      "name": "PHP",
+      "indicators": {
+        "files": ["composer.json", "composer.lock", "phpunit.xml"],
+        "extensions": [".php", ".phtml"],
+        "dependencies": ["php", "composer"]
+      },
+      "resources": {
+        "skills": ["php-8-features", "laravel-patterns", "phpstan-strict"],
+        "docs": ["https://www.php.net/docs.php"],
+        "linter": "phpcs",
+        "formatter": "php-cs-fixer"
+      },
+      "model_hint": "coding"
+    },
+    "ruby": {
+      "name": "Ruby",
+      "indicators": {
+        "files": ["Gemfile", "Gemfile.lock", "Rakefile", ".ruby-version"],
+        "extensions": [".rb", ".erb"],
+        "dependencies": ["ruby", "bundler"]
+      },
+      "resources": {
+        "skills": ["ruby-blocks", "rails-patterns", "rspec-patterns"],
+        "docs": ["https://ruby-doc.org/"],
+        "linter": "rubocop",
+        "formatter": "rubocop"
+      },
+      "model_hint": "coding"
+    },
+    "angular": {
+      "name": "Angular",
+      "indicators": {
+        "files": ["angular.json", ".angular.json"],
+        "extensions": [".component.ts", ".module.ts", ".service.ts"],
+        "dependencies": ["@angular/core"]
+      },
+      "resources": {
+        "skills": ["angular-signals", "angular-di", "angular-rxjs"],
+        "docs": ["https://angular.dev/"],
+        "linter": "eslint",
+        "formatter": "prettier"
+      },
+      "model_hint": "coding"
+    },
+    "vue": {
+      "name": "Vue.js",
+      "indicators": {
+        "files": ["vue.config.js", "vite.config.ts"],
+        "extensions": [".vue"],
+        "dependencies": ["vue"]
+      },
+      "resources": {
+        "skills": ["vue-composables", "vue-pinia", "vue-sfc"],
+        "docs": ["https://vuejs.org/guide/"],
+        "linter": "eslint",
+        "formatter": "prettier"
+      },
+      "model_hint": "coding"
+    },
+    "react": {
+      "name": "React",
+      "indicators": {
+        "files": [],
+        "extensions": [".jsx", ".tsx"],
+        "dependencies": ["react", "react-dom"]
+      },
+      "resources": {
+        "skills": ["react-hooks", "react-server-components", "react-query"],
+        "docs": ["https://react.dev/"],
+        "linter": "eslint",
+        "formatter": "prettier"
+      },
+      "model_hint": "coding"
+    },
+    "django": {
+      "name": "Django",
+      "indicators": {
+        "files": ["manage.py", "wsgi.py", "asgi.py"],
+        "extensions": [".py"],
+        "dependencies": ["django"]
+      },
+      "resources": {
+        "skills": ["django-orm", "django-rest", "django-middleware"],
+        "docs": ["https://docs.djangoproject.com/"],
+        "linter": "ruff",
+        "formatter": "black"
+      },
+      "model_hint": "coding"
+    },
+    "nextjs": {
+      "name": "Next.js",
+      "indicators": {
+        "files": ["next.config.js", "next.config.mjs", "next.config.ts"],
+        "extensions": [],
+        "dependencies": ["next"]
+      },
+      "resources": {
+        "skills": ["next-app-router", "next-server-actions", "next-middleware"],
+        "docs": ["https://nextjs.org/docs"],
+        "linter": "eslint",
+        "formatter": "prettier"
+      },
+      "model_hint": "coding"
+    },
+    "express": {
+      "name": "Express",
+      "indicators": {
+        "files": [],
+        "extensions": [],
+        "dependencies": ["express"]
+      },
+      "resources": {
+        "skills": ["express-middleware", "express-routing", "express-security"],
+        "docs": ["https://expressjs.com/"],
+        "linter": "eslint",
+        "formatter": "prettier"
+      },
+      "model_hint": "coding"
+    },
+    "fastapi": {
+      "name": "FastAPI",
+      "indicators": {
+        "files": [],
+        "extensions": [],
+        "dependencies": ["fastapi", "uvicorn"]
+      },
+      "resources": {
+        "skills": ["fastapi-deps", "fastapi-pydantic", "fastapi-auth"],
+        "docs": ["https://fastapi.tiangolo.com/"],
+        "linter": "ruff",
+        "formatter": "black"
+      },
+      "model_hint": "coding"
+    },
+    "spring": {
+      "name": "Spring Boot",
+      "indicators": {
+        "files": ["spring.factories", "application.properties", "application.yml"],
+        "extensions": [],
+        "dependencies": ["spring-boot", "spring-boot-starter"]
+      },
+      "resources": {
+        "skills": ["spring-di", "spring-data", "spring-security"],
+        "docs": ["https://spring.io/projects/spring-boot"],
+        "linter": "checkstyle",
+        "formatter": "google-java-format"
+      },
+      "model_hint": "architecture"
+    }
+  }
+}

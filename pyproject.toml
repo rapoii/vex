@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "vex"
+version = "1.0.0"
+description = "VEX — Vareva ECC Extended. 100% free, MIT-licensed agent harness system."
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.9"
+authors = [
+    {name = "Rafi Permana", email = "rapoii@github.com"},
+]
+keywords = ["claude-code", "agent-harness", "ai-agents", "skills", "open-source"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.urls]
+Homepage = "https://github.com/rapoii/vex"
+Repository = "https://github.com/rapoii/vex"
+Issues = "https://github.com/rapoii/vex/issues"
+
+[project.scripts]
+vex-skill-gen = "tools.vex_skill_gen:main"
+vex-cost = "tools.vex_cost:main"
+vex-memory = "tools.vex_memory:main"
