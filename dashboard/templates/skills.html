@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Skills ({{ skills|length }})</h2>
+</div>
+
+{% for category, items in skills|groupby('category') %}
+<h3 style="margin: 1.5rem 0 1rem; text-transform: capitalize; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">{{ category }}</h3>
+<div class="list-grid">
+    {% for skill in items %}
+    <div class="item-card">
+        <div class="item-header">
+            <span class="item-title">{{ skill.name }}</span>
+            <span class="badge ok">{{ skill.category }}</span>
+        </div>
+        <div class="item-desc">{{ skill.description or "No description provided." }}</div>
+        <div class="item-meta">
+            {{ skill.path.replace('\\', '/') }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endfor %}
+
+{% if not skills %}
+<div class="card">No skills found in skills directory.</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Overview</h2>
+</div>
+
+<div class="grid-cards">
+    <div class="card">
+        <div class="card-title">Agents Active</div>
+        <div class="card-value">{{ agents_count }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Skills Installed</div>
+        <div class="card-value">{{ skills_count }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Memory Files</div>
+        <div class="card-value">{{ memory_count }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Total Cost (USD)</div>
+        <div class="card-value">${{ "%.2f"|format(cost_summary.total_cost_usd) }}</div>
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h3>Health Checks</h3>
+    <ul style="margin-top: 1rem; list-style: none;">
+        {% for check in health.checks %}
+        <li style="margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span class="badge {{ check.status }}">{{ check.status | upper }}</span>
+            <strong>{{ check.name }}</strong>
+            <span style="color: var(--color-text-muted);">{{ check.detail }}</span>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

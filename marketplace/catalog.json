@@ -1,0 +1,184 @@
+{
+  "skills": [
+    {
+      "name": "ci-cd-setup",
+      "description": "VEX ci-cd-setup skill in automation category.",
+      "author": "VEX Community",
+      "category": "automation",
+      "downloads": 100,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/ci-cd-setup/manifest.json"
+    },
+    {
+      "name": "docker-compose",
+      "description": "VEX docker-compose skill in automation category.",
+      "author": "VEX Community",
+      "category": "automation",
+      "downloads": 110,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/docker-compose/manifest.json"
+    },
+    {
+      "name": "github-actions",
+      "description": "VEX github-actions skill in automation category.",
+      "author": "VEX Community",
+      "category": "automation",
+      "downloads": 120,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/github-actions/manifest.json"
+    },
+    {
+      "name": "pre-commit-hooks",
+      "description": "VEX pre-commit-hooks skill in automation category.",
+      "author": "VEX Community",
+      "category": "automation",
+      "downloads": 130,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/pre-commit-hooks/manifest.json"
+    },
+    {
+      "name": "release-automation",
+      "description": "VEX release-automation skill in automation category.",
+      "author": "VEX Community",
+      "category": "automation",
+      "downloads": 140,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/release-automation/manifest.json"
+    },
+    {
+      "name": "test-automation",
+      "description": "VEX test-automation skill in automation category.",
+      "author": "VEX Community",
+      "category": "automation",
+      "downloads": 150,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/automation/test-automation/manifest.json"
+    },
+    {
+      "name": "bundle-optimizer",
+      "description": "VEX bundle-optimizer skill in optimization category.",
+      "author": "VEX Community",
+      "category": "optimization",
+      "downloads": 160,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/bundle-optimizer/manifest.json"
+    },
+    {
+      "name": "context-window-manager",
+      "description": "VEX context-window-manager skill in optimization category.",
+      "author": "VEX Community",
+      "category": "optimization",
+      "downloads": 170,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/context-window-manager/manifest.json"
+    },
+    {
+      "name": "model-routing-optimizer",
+      "description": "VEX model-routing-optimizer skill in optimization category.",
+      "author": "VEX Community",
+      "category": "optimization",
+      "downloads": 180,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/model-routing-optimizer/manifest.json"
+    },
+    {
+      "name": "performance-audit",
+      "description": "VEX performance-audit skill in optimization category.",
+      "author": "VEX Community",
+      "category": "optimization",
+      "downloads": 190,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/performance-audit/manifest.json"
+    },
+    {
+      "name": "query-optimizer",
+      "description": "VEX query-optimizer skill in optimization category.",
+      "author": "VEX Community",
+      "category": "optimization",
+      "downloads": 200,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/query-optimizer/manifest.json"
+    },
+    {
+      "name": "token-budget-advisor",
+      "description": "VEX token-budget-advisor skill in optimization category.",
+      "author": "VEX Community",
+      "category": "optimization",
+      "downloads": 210,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/optimization/token-budget-advisor/manifest.json"
+    },
+    {
+      "name": "database-patterns",
+      "description": "VEX database-patterns skill in reference category.",
+      "author": "VEX Community",
+      "category": "reference",
+      "downloads": 220,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/database-patterns/manifest.json"
+    },
+    {
+      "name": "django-patterns",
+      "description": "VEX django-patterns skill in reference category.",
+      "author": "VEX Community",
+      "category": "reference",
+      "downloads": 230,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/django-patterns/manifest.json"
+    },
+    {
+      "name": "docker-patterns",
+      "description": "VEX docker-patterns skill in reference category.",
+      "author": "VEX Community",
+      "category": "reference",
+      "downloads": 240,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/docker-patterns/manifest.json"
+    },
+    {
+      "name": "fastapi-patterns",
+      "description": "VEX fastapi-patterns skill in reference category.",
+      "author": "VEX Community",
+      "category": "reference",
+      "downloads": 250,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/fastapi-patterns/manifest.json"
+    },
+    {
+      "name": "python-patterns",
+      "description": "VEX python-patterns skill in reference category.",
+      "author": "VEX Community",
+      "category": "reference",
+      "downloads": 260,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/python-patterns/manifest.json"
+    },
+    {
+      "name": "react-patterns",
+      "description": "VEX react-patterns skill in reference category.",
+      "author": "VEX Community",
+      "category": "reference",
+      "downloads": 270,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/react-patterns/manifest.json"
+    },
+    {
+      "name": "typescript-patterns",
+      "description": "VEX typescript-patterns skill in reference category.",
+      "author": "VEX Community",
+      "category": "reference",
+      "downloads": 280,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/typescript-patterns/manifest.json"
+    },
+    {
+      "name": "vue-patterns",
+      "description": "VEX vue-patterns skill in reference category.",
+      "author": "VEX Community",
+      "category": "reference",
+      "downloads": 290,
+      "rating": 4.5,
+      "install_url": "https://raw.githubusercontent.com/vareva/vex/main/skills/reference/vue-patterns/manifest.json"
+    }
+  ]
+}

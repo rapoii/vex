@@ -4,18 +4,19 @@
   "description": "VEX — Vareva ECC Extended. 100% free, MIT-licensed agent harness system for Claude Code.",
   "main": "index.js",
   "scripts": {
-    "install:vex": "bash install.sh --profile full",
-    "install:dev": "bash install.sh --profile developer",
-    "install:minimal": "bash install.sh --profile minimal",
+    "vex": "python tools/vex.py",
+    "install:vex": "python tools/vex.py install --profile full",
+    "install:dev": "python tools/vex.py install --profile developer",
+    "install:minimal": "python tools/vex.py install --profile minimal",
     "test": "node tests/run-all.js",
     "lint": "echo 'Linting VEX files...'",
     "build": "echo 'VEX is a declarative config system — no build step required.'",
-    "skill:gen": "python tools/vex-skill-gen.py generate",
-    "skill:list": "python tools/vex-skill-gen.py list",
-    "cost:report": "python tools/vex-cost.py report",
-    "cost:budget": "python tools/vex-cost.py budget status",
-    "memory:scan": "python tools/vex-memory.py scan",
-    "memory:search": "python tools/vex-memory.py search"
+    "skill:gen": "python tools/vex.py generate",
+    "skill:list": "python tools/vex.py skill list",
+    "cost:report": "python tools/vex.py cost report",
+    "cost:budget": "python tools/vex.py cost budget status",
+    "memory:scan": "python tools/vex.py memory scan",
+    "memory:search": "python tools/vex.py memory search"
   },
   "repository": {
     "type": "git",

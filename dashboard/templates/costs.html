@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Cost Analytics</h2>
+</div>
+
+<div class="grid-cards">
+    <div class="card">
+        <div class="card-title">Total Cost</div>
+        <div class="card-value">${{ "%.4f"|format(cost_summary.total_cost_usd) }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Input Tokens</div>
+        <div class="card-value">{{ "{:,}".format(cost_summary.total_input_tokens) }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Output Tokens</div>
+        <div class="card-value">{{ "{:,}".format(cost_summary.total_output_tokens) }}</div>
+    </div>
+    <div class="card">
+        <div class="card-title">Events Logged</div>
+        <div class="card-value">{{ "{:,}".format(cost_summary.record_count) }}</div>
+    </div>
+</div>
+
+{% if cost_summary.record_count > 0 %}
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h3>Cost by Model</h3>
+    <table style="margin-top: 1rem;">
+        <thead>
+            <tr>
+                <th>Model</th>
+                <th>Cost (USD)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for model, cost in cost_summary.by_model %}
+            <tr>
+                <td>{{ model }}</td>
+                <td>${{ "%.4f"|format(cost) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card">
+    <h3>Recent Activity (Last 50)</h3>
+    <div class="table-wrapper" style="margin-top: 1rem;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Model</th>
+                    <th>Input</th>
+                    <th>Output</th>
+                    <th>Cost</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in recent_records %}
+                <tr>
+                    <td style="white-space: nowrap;">{{ r.timestamp[:19].replace('T', ' ') }}</td>
+                    <td>{{ r.model }}</td>
+                    <td>{{ "{:,}".format(r.input_tokens) if r.input_tokens > 0 else "-" }}</td>
+                    <td>{{ "{:,}".format(r.output_tokens) if r.output_tokens > 0 else "-" }}</td>
+                    <td>${{ "%.4f"|format(r.cost_usd) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card">
+    <p>No cost records found. Run VEX agents or skills to populate `~/.claude/vex-costs.jsonl`.</p>
+</div>
+{% endif %}
+
+{% if cost_summary.skipped_lines > 0 %}
+<div style="margin-top: 1rem; color: var(--color-warn);">
+    ⚠ Skipped {{ cost_summary.skipped_lines }} unparseable lines in cost log.
+</div>
+{% endif %}
+
+{% endblock %}

@@ -15,6 +15,7 @@ VEX is a free, MIT-licensed agent harness system for building, testing, routing,
 - **Cross-project memory**: portable user, feedback, project, and reference memories with scoped access.
 - **Skill testing**: fixture-driven checks for skill triggers, instructions, and expected outputs.
 - **Web dashboard**: local dashboard for packs, runs, costs, skills, hooks, and health checks.
+- **Skill Marketplace**: browse, install, and rate community-curated skills via GitHub releases.
 - **Cross-harness adapters**: one manifest, many targets; Claude Code first, other harnesses later.
 
 ## Install
@@ -32,6 +33,28 @@ Claude Code bootstrap target:
 npm run vex -- install --target claude-code --profile default
 ```
 
+## Marketplace
+
+VEX includes a free, decentralized skill marketplace powered by GitHub Releases.
+
+```bash
+# Browse available skills
+python marketplace/installer.py browse
+
+# Install a skill
+python marketplace/installer.py install <skill-name>
+```
+
+## Testing & Contributing
+
+VEX uses standard Python `unittest` for its core tooling to stay lightweight.
+
+```bash
+python -m unittest discover -s tests
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to publish your own skills to the marketplace.
+
 ## Project structure
 
 ```text
@@ -44,6 +67,8 @@ contexts/    Project, harness, model, and environment context templates
 config/      Pack manifests, adapter config, defaults, and schemas
 tools/       Shared TypeScript/Python implementation modules
 scripts/     Validation, packaging, migration, and release scripts
+marketplace/ Marketplace catalog and installer CLI
+tests/       Core system unit tests
 ```
 
 ## ECC vs VEX

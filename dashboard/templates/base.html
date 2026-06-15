@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEX Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <h1 style="margin-bottom: 1.5rem; color: var(--color-accent);">VEX System</h1>
+            <nav>
+                <ul class="sidebar-nav">
+                    <li><a href="/" {% if request.path == '/' %}class="active"{% endif %}>Overview</a></li>
+                    <li><a href="/agents" {% if request.path == '/agents' %}class="active"{% endif %}>Agents</a></li>
+                    <li><a href="/skills" {% if request.path == '/skills' %}class="active"{% endif %}>Skills</a></li>
+                    <li><a href="/costs" {% if request.path == '/costs' %}class="active"{% endif %}>Costs</a></li>
+                    <li><a href="/memory" {% if request.path == '/memory' %}class="active"{% endif %}>Memory</a></li>
+                </ul>
+            </nav>
+            <div style="margin-top: 2rem;">
+                <div id="health-badge-container" hx-get="/health" hx-trigger="load, every 30s" hx-swap="innerHTML">
+                    <!-- Loaded via HTMX -->
+                    <span class="badge">Checking health...</span>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

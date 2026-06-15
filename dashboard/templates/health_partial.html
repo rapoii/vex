@@ -1,0 +1,9 @@
+<span class="badge {{ health.status }}">
+    {% if health.status == 'ok' %}✓ System Healthy
+    {% elif health.status == 'warn' %}⚠ Warnings
+    {% else %}✕ System Error
+    {% endif %}
+</span>
+<div style="font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.25rem;">
+    Last checked: {{ health.checked_at.split('.')[0] }}
+</div>

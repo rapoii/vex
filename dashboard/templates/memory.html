@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Memory Sources ({{ memory_items|length }})</h2>
+</div>
+
+<div class="list-grid">
+    {% for item in memory_items %}
+    <div class="item-card">
+        <div class="item-header">
+            <span class="item-title">{{ item.name }}</span>
+            <span class="badge ok">{{ item.category }}</span>
+        </div>
+        <div class="item-desc">
+            {% if item.description %}
+            <div class="code-snippet">{{ item.description }}</div>
+            {% else %}
+            <em>No summary available.</em>
+            {% endif %}
+        </div>
+        <div class="item-meta">
+            {{ item.path.replace('\\', '/') }}<br>
+            Size: {{ (item.size_bytes / 1024)|round(1) }} KB
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% if not memory_items %}
+<div class="card">No contextual memory items found.</div>
+{% endif %}
+{% endblock %}
