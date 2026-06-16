@@ -1,0 +1,67 @@
+{
+  "version": "1.0.0",
+  "defaultProfile": "developer",
+  "profiles": {
+    "minimal": {
+      "description": "Core agents and essential tools only.",
+      "include": [
+        "agents/core",
+        "skills/workflow/tdd-workflow",
+        "skills/workflow/code-review-flow",
+        "tools/vex.py",
+        "tools/vex_security.py",
+        "config/profiles.json"
+      ]
+    },
+    "developer": {
+      "description": "Agents, skills, rules, and commands for active development.",
+      "include": [
+        "agents",
+        "skills",
+        "rules",
+        "commands",
+        "contexts",
+        "tools",
+        "config",
+        "adapters"
+      ]
+    },
+    "security": {
+      "description": "Security agents, security skills, hooks, and scanners.",
+      "include": [
+        "agents/core/security-reviewer.md",
+        "agents/language/python-reviewer.md",
+        "skills/security",
+        "hooks",
+        "tools/vex.py",
+        "tools/vex_security.py",
+        "config/profiles.json",
+        "adapters"
+      ]
+    },
+    "full": {
+      "description": "Everything included in VEX.",
+      "include": [
+        "agents",
+        "skills",
+        "rules",
+        "commands",
+        "contexts",
+        "hooks",
+        "tools",
+        "config",
+        "adapters",
+        "marketplace"
+      ]
+    },
+    "selective": {
+      "description": "Interactive selection placeholder for installer-driven prompts.",
+      "include": [
+        "tools/vex.py",
+        "tools/vex_security.py",
+        "config/profiles.json"
+      ],
+      "interactive": true
+    }
+  }
+}

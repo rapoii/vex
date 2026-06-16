@@ -1,0 +1,27 @@
+{
+  "id": "copilot-cli",
+  "harness": "GitHub Copilot CLI",
+  "version": "1.0.0",
+  "fileMapping": {
+    "agents": ".github/copilot-instructions.md",
+    "skills": ".github/copilot-instructions.md",
+    "rules": ".github/copilot-instructions.md",
+    "hooks": "unsupported",
+    "commands": "unsupported",
+    "contexts": ".github/copilot-instructions.md"
+  },
+  "features": {
+    "agents": "compiled",
+    "skills": "compiled",
+    "rules": "compiled",
+    "hooks": "none",
+    "commands": "none"
+  },
+  "install": {
+    "defaultTarget": ".",
+    "commands": [
+      "python adapters/install_adapter.py install copilot-cli --profile developer --target-dir ."
+    ],
+    "notes": "Compiles VEX guidance into GitHub Copilot instruction files."
+  }
+}

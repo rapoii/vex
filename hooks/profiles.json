@@ -1,0 +1,61 @@
+{
+  "version": "1.0.0",
+  "profiles": {
+    "minimal": {
+      "description": "Only lightweight safety hooks.",
+      "hooks": {
+        "PreToolUse": ["check-file-size"]
+      }
+    },
+    "standard": {
+      "description": "Balanced default hooks for normal VEX work.",
+      "hooks": {
+        "PreToolUse": ["check-file-size"],
+        "PostToolUse": ["validate-frontmatter"],
+        "SessionStart": ["session-start"],
+        "Stop": ["session-summary"]
+      }
+    },
+    "strict": {
+      "description": "All local validation hooks enabled.",
+      "hooks": {
+        "PreToolUse": ["check-file-size"],
+        "PostToolUse": ["validate-frontmatter"],
+        "SessionStart": ["session-start"],
+        "Stop": ["session-summary"]
+      }
+    },
+    "custom": {
+      "description": "User-managed profile resolved through runtime controls.",
+      "hooks": {}
+    }
+  },
+  "hook_definitions": {
+    "check-file-size": {
+      "name": "check-file-size",
+      "type": "command",
+      "command": "python hooks/scripts/check-file-size.py",
+      "matcher": "Write|Edit",
+      "description": "Block oversized generated files"
+    },
+    "validate-frontmatter": {
+      "name": "validate-frontmatter",
+      "type": "command",
+      "command": "python hooks/scripts/validate-frontmatter.py",
+      "matcher": "Write|Edit",
+      "description": "Validate markdown frontmatter after edits"
+    },
+    "session-summary": {
+      "name": "session-summary",
+      "type": "command",
+      "command": "python hooks/scripts/session-summary.py",
+      "description": "Summarize VEX session status"
+    },
+    "session-start": {
+      "name": "session-start",
+      "type": "command",
+      "command": "python hooks/scripts/session-start.py",
+      "description": "Show VEX toolkit context"
+    }
+  }
+}

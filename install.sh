@@ -5,7 +5,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VEX_HOME="${VEX_HOME:-$HOME/.vex}"
-PROFILE="${PROFILE:-default}"
+PROFILE="${PROFILE:-developer}"
 DRY_RUN=false
 UNINSTALL=false
 
@@ -20,6 +20,17 @@ info()  { echo -e "${BLUE}[vex]${NC} $*"; }
 ok()    { echo -e "${GREEN}[vex]${NC} $*"; }
 warn()  { echo -e "${YELLOW}[vex]${NC} $*"; }
 err()   { echo -e "${RED}[vex]${NC} $*" >&2; }
+
+backup_file() {
+    local path="$1"
+    if [[ -f "$path" ]]; then
+        cp "$path" "$path.bak"
+    fi
+}
+
+profile_includes_security() {
+    [[ "$PROFILE" == "security" || "$PROFILE" == "developer" || "$PROFILE" == "full" ]]
+}
 
 usage() {
     cat <<EOF

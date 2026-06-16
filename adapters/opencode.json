@@ -1,0 +1,27 @@
+{
+  "id": "opencode",
+  "harness": "OpenCode",
+  "version": "1.0.0",
+  "fileMapping": {
+    "agents": ".opencode/agents",
+    "skills": ".opencode/skills",
+    "rules": ".opencode/instructions.md",
+    "hooks": ".opencode/hooks.json",
+    "commands": ".opencode/commands",
+    "contexts": ".opencode/contexts"
+  },
+  "features": {
+    "agents": "partial",
+    "skills": "partial",
+    "rules": "compiled",
+    "hooks": "partial",
+    "commands": "partial"
+  },
+  "install": {
+    "defaultTarget": ".",
+    "commands": [
+      "python adapters/install_adapter.py install opencode --profile developer --target-dir ."
+    ],
+    "notes": "Maps VEX assets into .opencode where supported."
+  }
+}

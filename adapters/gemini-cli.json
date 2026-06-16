@@ -1,0 +1,27 @@
+{
+  "id": "gemini-cli",
+  "harness": "Gemini CLI",
+  "version": "1.0.0",
+  "fileMapping": {
+    "agents": ".gemini/vex-agents.md",
+    "skills": ".gemini/vex-skills.md",
+    "rules": ".gemini/GEMINI.md",
+    "hooks": "unsupported",
+    "commands": ".gemini/commands",
+    "contexts": ".gemini/vex-contexts.md"
+  },
+  "features": {
+    "agents": "compiled",
+    "skills": "compiled",
+    "rules": "compiled",
+    "hooks": "none",
+    "commands": "partial"
+  },
+  "install": {
+    "defaultTarget": ".",
+    "commands": [
+      "python adapters/install_adapter.py install gemini-cli --profile developer --target-dir ."
+    ],
+    "notes": "Writes VEX guidance under .gemini."
+  }
+}

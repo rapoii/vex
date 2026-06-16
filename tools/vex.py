@@ -18,6 +18,10 @@ COMMAND_MAP = {
     "generate": ("python", TOOLS_DIR / "vex_skill_gen.py", "generate"),
     "cost": ("python", TOOLS_DIR / "vex_cost.py"),
     "memory": ("python", TOOLS_DIR / "vex_memory.py"),
+    "sessions": ("python", TOOLS_DIR / "vex_sessions.py"),
+    "instinct": ("python", TOOLS_DIR / "vex_instinct.py"),
+    "hooks": ("python", TOOLS_DIR / "vex_hooks.py"),
+    "optimize": ("python", TOOLS_DIR / "vex_optimize.py"),
     "dashboard": ("python", REPO_ROOT / "dashboard" / "server.py"),
     "install": ("bash", REPO_ROOT / "install.sh"),
 }

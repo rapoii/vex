@@ -1,0 +1,27 @@
+{
+  "id": "cursor",
+  "harness": "Cursor",
+  "version": "1.0.0",
+  "fileMapping": {
+    "agents": ".cursor/rules/vex-agents.md",
+    "skills": ".cursor/rules/vex-skills.md",
+    "rules": ".cursorrules",
+    "hooks": "unsupported",
+    "commands": ".cursor/commands",
+    "contexts": ".cursor/rules/vex-contexts.md"
+  },
+  "features": {
+    "agents": "compiled",
+    "skills": "compiled",
+    "rules": "full",
+    "hooks": "none",
+    "commands": "partial"
+  },
+  "install": {
+    "defaultTarget": ".",
+    "commands": [
+      "python adapters/install_adapter.py install cursor --profile developer --target-dir ."
+    ],
+    "notes": "Compiles VEX guidance into Cursor rules files. Hooks are not installed."
+  }
+}

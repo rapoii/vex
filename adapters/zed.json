@@ -1,0 +1,27 @@
+{
+  "id": "zed",
+  "harness": "Zed",
+  "version": "1.0.0",
+  "fileMapping": {
+    "agents": ".zed/vex-agents.md",
+    "skills": ".zed/vex-skills.md",
+    "rules": ".zed/instructions.md",
+    "hooks": "unsupported",
+    "commands": "unsupported",
+    "contexts": ".zed/vex-contexts.md"
+  },
+  "features": {
+    "agents": "compiled",
+    "skills": "compiled",
+    "rules": "compiled",
+    "hooks": "none",
+    "commands": "none"
+  },
+  "install": {
+    "defaultTarget": ".",
+    "commands": [
+      "python adapters/install_adapter.py install zed --profile developer --target-dir ."
+    ],
+    "notes": "Writes VEX guidance into .zed instruction files."
+  }
+}

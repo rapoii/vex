@@ -1,0 +1,27 @@
+{
+  "id": "claude-code",
+  "harness": "Claude Code",
+  "version": "1.0.0",
+  "fileMapping": {
+    "agents": "agents/*.md",
+    "skills": "skills/*/*/SKILL.md",
+    "rules": "rules/**/*.md",
+    "hooks": "settings.json",
+    "commands": "commands/*.md",
+    "contexts": "contexts/*.md"
+  },
+  "features": {
+    "agents": "full",
+    "skills": "full",
+    "rules": "full",
+    "hooks": "full",
+    "commands": "full"
+  },
+  "install": {
+    "defaultTarget": "~/.claude",
+    "commands": [
+      "python adapters/install_adapter.py install claude-code --profile developer"
+    ],
+    "notes": "Default VEX target. Uses Claude Code-native agents, skills, commands, hooks, and rules."
+  }
+}

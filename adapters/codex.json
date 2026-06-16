@@ -1,0 +1,27 @@
+{
+  "id": "codex",
+  "harness": "Codex CLI",
+  "version": "1.0.0",
+  "fileMapping": {
+    "agents": "AGENTS.md",
+    "skills": "AGENTS.md",
+    "rules": "AGENTS.md",
+    "hooks": "unsupported",
+    "commands": "unsupported",
+    "contexts": "AGENTS.md"
+  },
+  "features": {
+    "agents": "compiled",
+    "skills": "compiled",
+    "rules": "compiled",
+    "hooks": "none",
+    "commands": "none"
+  },
+  "install": {
+    "defaultTarget": ".",
+    "commands": [
+      "python adapters/install_adapter.py install codex --profile developer --target-dir ."
+    ],
+    "notes": "Compiles VEX guidance into AGENTS.md."
+  }
+}

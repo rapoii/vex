@@ -6,7 +6,8 @@ VEX agents are small, typed roles that operate through harness adapters. Claude 
 
 | Group | Purpose | Examples |
 | --- | --- | --- |
-| Planning | Turn broad goals into scoped work | planner, architect, product-planner |
+| Planning | Turn broad goals into scoped work | brainstormer, planner, architect, product-planner |
+| Coordination | Split approved plans into safe agent batches | subagent-coordinator |
 | Build | Implement features and fixes | feature-builder, refactorer, migrator |
 | Quality | Review, test, and verify changes | code-reviewer, tdd-guide, e2e-runner |
 | Safety | Check security and operational risk | security-reviewer, secret-scanner |
@@ -14,22 +15,26 @@ VEX agents are small, typed roles that operate through harness adapters. Claude 
 
 ## Default workflow
 
-1. Use `planner` for complex features, migrations, or multi-file changes.
-2. Use `architect` for component boundaries, install paths, data flow, and cross-harness decisions.
-3. Use `tdd-guide` before adding behavior or validation logic.
-4. Use implementation agents only after scope is clear.
-5. Use `code-reviewer` after code or docs change.
-6. Use `security-reviewer` before publishing, installing hooks, or changing trust boundaries.
+1. Use `brainstormer` when user intent, success criteria, or product shape is unclear.
+2. Use `planner` for complex features, migrations, or multi-file changes after scope is clear.
+3. Use `architect` for component boundaries, install paths, data flow, and cross-harness decisions.
+4. Use `tdd-guide` before adding behavior or validation logic.
+5. Use `subagent-coordinator` to split approved plans into fresh subagent tasks with batch checkpoints.
+6. Use implementation agents only after scope is clear.
+7. Use `code-reviewer` after code or docs change.
+8. Use `security-reviewer` before publishing, installing hooks, or changing trust boundaries.
 
 ## Parallelism
 
 Run independent agents in parallel when their outputs do not depend on each other:
 
+- brainstormer and architect can run together for early design options when product intent and system boundary are both unclear.
 - planner and architect can run together for greenfield design.
+- subagent-coordinator can batch independent implementation agents after plan approval.
 - code-reviewer and security-reviewer can run together after files are created.
 - cost-analyst and skill-miner can run together after run transcripts exist.
 
-Do not parallelize agents that edit the same files unless they run in isolated worktrees and merge through review.
+Do not parallelize agents that edit the same files unless they run in isolated worktrees and merge through review. Use `subagent-coordinator` to identify safe batches and required human checkpoints.
 
 ## Manifest contract
 

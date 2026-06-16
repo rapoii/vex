@@ -1,4 +1,9 @@
 {
+  "profile_support": {
+    "profiles": "hooks/profiles.json",
+    "runtime_env": ["VEX_HOOK_PROFILE", "VEX_DISABLED_HOOKS"],
+    "cli": ["python tools/vex_hooks.py profile set <name>", "python tools/vex_hooks.py disable <hook-name>"]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -6,6 +11,8 @@
         "hooks": [
           {
             "type": "command",
+            "name": "check-file-size",
+            "profiles": ["minimal", "standard", "strict"],
             "command": "python hooks/scripts/check-file-size.py",
             "description": "Block oversized generated files"
           }
@@ -18,6 +25,8 @@
         "hooks": [
           {
             "type": "command",
+            "name": "validate-frontmatter",
+            "profiles": ["standard", "strict"],
             "command": "python hooks/scripts/validate-frontmatter.py",
             "description": "Validate markdown frontmatter after edits"
           }
@@ -29,6 +38,8 @@
         "hooks": [
           {
             "type": "command",
+            "name": "session-summary",
+            "profiles": ["standard", "strict"],
             "command": "python hooks/scripts/session-summary.py",
             "description": "Summarize VEX session status"
           }
@@ -40,6 +51,8 @@
         "hooks": [
           {
             "type": "command",
+            "name": "session-start",
+            "profiles": ["standard", "strict"],
             "command": "python hooks/scripts/session-start.py",
             "description": "Show VEX toolkit context"
           }
