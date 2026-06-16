@@ -14,12 +14,32 @@ $VexHome = if ($env:VEX_HOME) { $env:VEX_HOME } else { Join-Path $env:USERPROFIL
 $ProfileDir = Join-Path $env:USERPROFILE ".hermes\profiles\$Profile"
 $ToolsDest = Join-Path $VexHome "tools"
 $ConfigDest = Join-Path $VexHome "config"
+$AdaptersDest = Join-Path $VexHome "adapters"
+$MarketplaceDest = Join-Path $VexHome "marketplace"
 $SkillsDest = Join-Path $ProfileDir "skills"
+$Tools = @(
+    "vex.py",
+    "vex_skill_gen.py",
+    "vex_cost.py",
+    "vex_memory.py",
+    "vex_sessions.py",
+    "vex_security.py",
+    "vex_instinct.py",
+    "vex_hooks.py",
+    "vex_optimize.py"
+)
 
 function Write-Info { param($Msg) Write-Host "[vex] $Msg" -ForegroundColor Cyan }
 function Write-Ok   { param($Msg) Write-Host "[vex] $Msg" -ForegroundColor Green }
 function Write-Warn { param($Msg) Write-Host "[vex] $Msg" -ForegroundColor Yellow }
 function Write-Err  { param($Msg) Write-Host "[vex] $Msg" -ForegroundColor Red }
+
+function Backup-File {
+    param([string]$Path)
+    if (Test-Path -LiteralPath $Path -PathType Leaf) {
+        Copy-Item -LiteralPath $Path -Destination "$Path.bak" -Force
+    }
+}
 
 if ($Help) {
     @"
@@ -42,6 +62,63 @@ Environment:
     exit 0
 }
 
+function Write-DryRunInstall {
+    Write-Warn "DRY RUN - no changes will be made"
+    ""
+    "Would create directories:"
+    "  $ToolsDest"
+    "  $ConfigDest"
+    "  $AdaptersDest"
+    "  $MarketplaceDest"
+    "  $SkillsDest"
+    ""
+    "Would copy tools:"
+    foreach ($Tool in $Tools) {
+        "  tools/$Tool -> $ToolsDest/"
+    }
+    ""
+    "Would copy directories:"
+    "  config/      -> $ConfigDest/"
+    "  adapters/    -> $AdaptersDest/"
+    "  marketplace/ -> $MarketplaceDest/"
+    ""
+    "Would add to PATH:"
+    "  $ToolsDest"
+    ""
+    "Would create wrappers:"
+    foreach ($Tool in $Tools) {
+        $Name = [IO.Path]::GetFileNameWithoutExtension($Tool)
+        "  $ToolsDest\$Name.cmd"
+        "  $ToolsDest\$Name.ps1"
+    }
+}
+
+function Copy-DirectoryContents {
+    param(
+        [string]$Source,
+        [string]$Destination
+    )
+    New-Item -ItemType Directory -Force -Path $Destination | Out-Null
+    Copy-Item -Path (Join-Path $Source "*") -Destination $Destination -Recurse -Force
+}
+
+function New-ToolWrapper {
+    param([string]$Name)
+    $CmdPath = Join-Path $ToolsDest "$Name.cmd"
+    $Ps1Path = Join-Path $ToolsDest "$Name.ps1"
+    $PyFile = Join-Path $ToolsDest "$Name.py"
+
+    @"
+@echo off
+python "$PyFile" %*
+"@ | Set-Content -Path $CmdPath -Encoding ASCII
+
+    @"
+#!/usr/bin/env pwsh
+python "$PyFile" @args
+"@ | Set-Content -Path $Ps1Path -Encoding UTF8
+}
+
 function Install-VexTools {
     Write-Info "Installing VEX tools..."
     Write-Info "  Profile:    $Profile"
@@ -49,65 +126,29 @@ function Install-VexTools {
     Write-Info "  Source:     $ScriptDir"
 
     if ($DryRun) {
-        Write-Warn "DRY RUN - no changes will be made"
-        ""
-        "Would create directories:"
-        "  $ToolsDest"
-        "  $ConfigDest"
-        "  $SkillsDest"
-        ""
-        "Would copy:"
-        "  tools/vex_skill_gen.py -> $ToolsDest/"
-        "  tools/vex_cost.py      -> $ToolsDest/"
-        "  tools/vex_memory.py    -> $ToolsDest/"
-        "  config/stacks.json     -> $ConfigDest/"
-        "  config/models.json     -> $ConfigDest/"
-        ""
-        "Would add to PATH:"
-        "  $ToolsDest"
-        ""
-        "Would create batch wrappers:"
-        "  $ToolsDest/vex_skill_gen.cmd"
-        "  $ToolsDest/vex_cost.cmd"
-        "  $ToolsDest/vex_memory.cmd"
+        Write-DryRunInstall
         return
     }
 
-    # Create directories
     New-Item -ItemType Directory -Force -Path $ToolsDest | Out-Null
     New-Item -ItemType Directory -Force -Path $ConfigDest | Out-Null
+    New-Item -ItemType Directory -Force -Path $AdaptersDest | Out-Null
+    New-Item -ItemType Directory -Force -Path $MarketplaceDest | Out-Null
     New-Item -ItemType Directory -Force -Path $SkillsDest | Out-Null
 
-    # Copy tools
-    Copy-Item (Join-Path $ScriptDir "tools\vex_skill_gen.py") $ToolsDest -Force
-    Copy-Item (Join-Path $ScriptDir "tools\vex_cost.py") $ToolsDest -Force
-    Copy-Item (Join-Path $ScriptDir "tools\vex_memory.py") $ToolsDest -Force
-
-    # Copy config
-    Backup-File (Join-Path $ConfigDest "stacks.json")
-    Copy-Item (Join-Path $ScriptDir "config\stacks.json") $ConfigDest -Force
-    Backup-File (Join-Path $ConfigDest "models.json")
-    Copy-Item (Join-Path $ScriptDir "config\models.json") $ConfigDest -Force
-
-    # Create batch wrapper scripts
-    $tools = @("vex_skill_gen", "vex_cost", "vex_memory")
-    foreach ($tool in $tools) {
-        $cmdPath = Join-Path $ToolsDest "$tool.cmd"
-        $pyFile = Join-Path $ToolsDest "$tool.py"
-        @"
-@echo off
-python "$pyFile" %*
-"@ | Set-Content -Path $cmdPath -Encoding ASCII
-
-        # Also create PowerShell wrapper
-        $ps1Path = Join-Path $ToolsDest "$tool.ps1"
-        @"
-#!/usr/bin/env pwsh
-python "$pyFile" @args
-"@ | Set-Content -Path $ps1Path -Encoding UTF8
+    foreach ($Tool in $Tools) {
+        Backup-File (Join-Path $ToolsDest $Tool)
+        Copy-Item (Join-Path $ScriptDir "tools\$Tool") $ToolsDest -Force
     }
 
-    # Add to user PATH if not already present
+    Copy-DirectoryContents (Join-Path $ScriptDir "config") $ConfigDest
+    Copy-DirectoryContents (Join-Path $ScriptDir "adapters") $AdaptersDest
+    Copy-DirectoryContents (Join-Path $ScriptDir "marketplace") $MarketplaceDest
+
+    foreach ($Tool in $Tools) {
+        New-ToolWrapper ([IO.Path]::GetFileNameWithoutExtension($Tool))
+    }
+
     $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
     if ($currentPath -notlike "*$ToolsDest*") {
         $newPath = "$ToolsDest;$currentPath"
@@ -118,7 +159,6 @@ python "$pyFile" @args
         Write-Info "PATH already includes $ToolsDest"
     }
 
-    # Set VEX_HOME environment variable
     $currentVexHome = [Environment]::GetEnvironmentVariable("VEX_HOME", "User")
     if (-not $currentVexHome) {
         [Environment]::SetEnvironmentVariable("VEX_HOME", $VexHome, "User")
@@ -129,18 +169,19 @@ python "$pyFile" @args
     ""
     Write-Ok "Installation complete!"
     ""
-    "  Tools:     $ToolsDest"
-    "  Config:    $ConfigDest"
-    "  Profile:   $Profile"
+    "  Tools:       $ToolsDest"
+    "  Config:      $ConfigDest"
+    "  Adapters:    $AdaptersDest"
+    "  Marketplace: $MarketplaceDest"
+    "  Profile:     $Profile"
     ""
     "  Quick start (restart terminal first):"
-    "    vex_skill_gen scan          # Scan sessions for patterns"
-    "    vex_cost report             # View cost report"
-    "    vex_memory scan             # Build knowledge graph"
-    "    vex_cost models             # View model pricing"
+    "    vex --help"
+    "    vex_cost report"
+    "    vex_memory scan"
     ""
     "  Or run directly:"
-    "    python $ToolsDest\vex_skill_gen.py scan"
+    "    python $ToolsDest\vex.py --help"
 }
 
 function Uninstall-VexTools {
@@ -151,18 +192,21 @@ function Uninstall-VexTools {
         ""
         "Would remove:"
         "  $ToolsDest"
+        "  $AdaptersDest"
+        "  $MarketplaceDest"
         "  (config and data in $VexHome preserved)"
         return
     }
 
-    if (Test-Path $ToolsDest) {
-        Remove-Item -Recurse -Force $ToolsDest
-        Write-Ok "Removed $ToolsDest"
-    } else {
-        Write-Warn "Tools directory not found: $ToolsDest"
+    foreach ($Path in @($ToolsDest, $AdaptersDest, $MarketplaceDest)) {
+        if (Test-Path $Path) {
+            Remove-Item -Recurse -Force $Path -Confirm:$false
+            Write-Ok "Removed $Path"
+        } else {
+            Write-Warn "Directory not found: $Path"
+        }
     }
 
-    # Remove from PATH
     $currentPath = [Environment]::GetEnvironmentVariable("Path", "User")
     if ($currentPath -like "*$ToolsDest*") {
         $newPath = ($currentPath -split ";" | Where-Object { $_ -ne $ToolsDest }) -join ";"
@@ -170,14 +214,13 @@ function Uninstall-VexTools {
         Write-Ok "Removed $ToolsDest from PATH"
     }
 
-    Write-Info "Preserved data directory: $VexHome"
+    Write-Info "Preserved config and data directory: $VexHome"
     Write-Info "To fully remove: Remove-Item -Recurse -Force $VexHome"
 
     ""
     Write-Ok "Uninstallation complete."
 }
 
-# Main
 if ($Uninstall) {
     Uninstall-VexTools
 } else {

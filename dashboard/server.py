@@ -1,25 +1,25 @@
+import datetime
 import json
-import logging
 import os
 import secrets
-import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
-from flask import Flask, render_template, request, jsonify
+from urllib.parse import urlencode
 
-# Config
+from flask import Flask, Response, jsonify, redirect, render_template, request
+
 PROJECT_ROOT = Path(os.path.abspath(__file__)).parent.parent
 AGENTS_DIR = PROJECT_ROOT / "agents"
 SKILLS_DIR = PROJECT_ROOT / "skills"
 CONTEXTS_DIR = PROJECT_ROOT / "contexts"
 RULES_DIR = PROJECT_ROOT / "rules"
 COST_LOG_PATH = Path.home() / ".claude" / "vex-costs.jsonl"
+MAX_READ_BYTES = 128_000
+AUTH_TOKEN = secrets.token_urlsafe(32)
 
-MAX_READ_BYTES = 128000
 
-# Models
 @dataclass(frozen=True)
 class CatalogItem:
     name: str
@@ -30,6 +30,7 @@ class CatalogItem:
     tools: tuple[str, ...]
     size_bytes: int
 
+
 @dataclass(frozen=True)
 class CostRecord:
     timestamp: str
@@ -37,6 +38,7 @@ class CostRecord:
     input_tokens: int
     output_tokens: int
     cost_usd: float
+
 
 @dataclass(frozen=True)
 class CostSummary:
@@ -47,324 +49,348 @@ class CostSummary:
     skipped_lines: int
     by_model: tuple[tuple[str, float], ...]
 
+
 @dataclass(frozen=True)
 class HealthStatus:
     status: str
     checked_at: str
-    checks: tuple[dict, ...]
+    checks: tuple[dict[str, Any], ...]
 
-# Parsers & File Readers
-def parse_frontmatter(text: str) -> Tuple[Dict[str, str], str]:
+
+def parse_frontmatter(text: str) -> tuple[dict[str, str], str]:
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
         return {}, text
 
-    metadata = {}
+    metadata: dict[str, str] = {}
     body_start = 1
-    for i in range(1, len(lines)):
-        if lines[i].strip() == "---":
-            body_start = i + 1
+    for index in range(1, len(lines)):
+        line = lines[index]
+        if line.strip() == "---":
+            body_start = index + 1
             break
-        if ":" in lines[i]:
-            k, v = lines[i].split(":", 1)
-            metadata[k.strip()] = v.strip().strip("'\"")
+        if ":" in line:
+            key, value = line.split(":", 1)
+            metadata[key.strip()] = value.strip().strip("'\"")
     return metadata, "\n".join(lines[body_start:])
+
 
 def read_text_head(path: Path) -> str:
     try:
         if not path.is_file():
             return ""
-        with open(path, "r", encoding="utf-8", errors="replace") as f:
-            return f.read(MAX_READ_BYTES)
-    except Exception:
+        return path.read_text(encoding="utf-8", errors="replace")[:MAX_READ_BYTES]
+    except OSError:
         return ""
 
-def list_agents() -> List[CatalogItem]:
+
+def first_body_line(body: str) -> str:
+    for line in body.splitlines():
+        stripped = line.strip()
+        if stripped and not stripped.startswith("#"):
+            return stripped[:200]
+    return ""
+
+
+def list_agents() -> list[CatalogItem]:
     if not AGENTS_DIR.is_dir():
         return []
-    agents = []
+
+    agents: list[CatalogItem] = []
     for root, _, files in os.walk(AGENTS_DIR):
         root_path = Path(root)
-        for f in files:
-            if f.endswith(".md"):
-                file_path = root_path / f
-                text = read_text_head(file_path)
-                meta, body = parse_frontmatter(text)
+        for filename in files:
+            if not filename.endswith(".md"):
+                continue
 
-                # Try to extract description from meta or first paragraph
-                desc = meta.get("description", "")
-                if not desc:
-                    for line in body.splitlines():
-                        line = line.strip()
-                        if line and not line.startswith("#"):
-                            desc = line[:200]
-                            break
-
-                tools = tuple([t.strip() for t in meta.get("tools", "*").split(",")])
-                cat = root_path.name if root_path != AGENTS_DIR else "core"
-                rel = str(file_path.relative_to(PROJECT_ROOT))
-
-                agents.append(CatalogItem(
+            file_path = root_path / filename
+            text = read_text_head(file_path)
+            metadata, body = parse_frontmatter(text)
+            description = metadata.get("description", "") or first_body_line(body)
+            tools = tuple(tool.strip() for tool in metadata.get("tools", "*").split(","))
+            category = root_path.name if root_path != AGENTS_DIR else "core"
+            agents.append(
+                CatalogItem(
                     name=file_path.stem,
-                    category=cat,
-                    path=rel,
-                    title=meta.get("name", file_path.stem),
-                    description=desc,
+                    category=category,
+                    path=str(file_path.relative_to(PROJECT_ROOT)),
+                    title=metadata.get("name", file_path.stem),
+                    description=description,
                     tools=tools,
-                    size_bytes=file_path.stat().st_size
-                ))
-    agents.sort(key=lambda a: (a.category, a.name))
-    return agents
+                    size_bytes=file_path.stat().st_size,
+                )
+            )
 
-def list_skills() -> List[CatalogItem]:
+    return sorted(agents, key=lambda item: (item.category, item.name))
+
+
+def list_skills() -> list[CatalogItem]:
     if not SKILLS_DIR.is_dir():
         return []
-    skills = []
+
+    skills: list[CatalogItem] = []
     for root, _, files in os.walk(SKILLS_DIR):
         root_path = Path(root)
-        if "SKILL.md" in files:
-            file_path = root_path / "SKILL.md"
-            text = read_text_head(file_path)
+        if "SKILL.md" not in files:
+            continue
 
-            # Simple header extraction
-            title = root_path.name
-            desc = ""
-            for line in text.splitlines():
-                if line.startswith("# "):
-                    title = line[2:].strip()
-                elif line.strip() and not line.startswith("#"):
-                    desc = line.strip()[:200]
-                    break
+        file_path = root_path / "SKILL.md"
+        text = read_text_head(file_path)
+        title = root_path.name
+        description = ""
+        for line in text.splitlines():
+            stripped = line.strip()
+            if stripped.startswith("# "):
+                title = stripped[2:].strip()
+            elif stripped and not stripped.startswith("#"):
+                description = stripped[:200]
+                break
 
-            cat = root_path.parent.name if root_path.parent != SKILLS_DIR else "domain"
-            rel = str(file_path.relative_to(PROJECT_ROOT))
-
-            skills.append(CatalogItem(
+        category = root_path.parent.name if root_path.parent != SKILLS_DIR else "domain"
+        skills.append(
+            CatalogItem(
                 name=root_path.name,
-                category=cat,
-                path=rel,
+                category=category,
+                path=str(file_path.relative_to(PROJECT_ROOT)),
                 title=title,
-                description=desc,
+                description=description,
                 tools=(),
-                size_bytes=file_path.stat().st_size
-            ))
-    skills.sort(key=lambda s: (s.category, s.name))
-    return skills
+                size_bytes=file_path.stat().st_size,
+            )
+        )
 
-def list_memory_sources() -> List[CatalogItem]:
-    items = []
-    dirs = [
-        (CONTEXTS_DIR, "context"),
-        (RULES_DIR, "rule"),
-    ]
-    for d, cat in dirs:
-        if d.is_dir():
-            for root, _, files in os.walk(d):
-                for f in files:
-                    if f.endswith(".md"):
-                        file_path = Path(root) / f
-                        text = read_text_head(file_path)
-                        rel = str(file_path.relative_to(PROJECT_ROOT))
-                        desc = text.strip()[:300]
-                        items.append(CatalogItem(
-                            name=f,
-                            category=cat,
-                            path=rel,
-                            title=f,
-                            description=desc,
-                            tools=(),
-                            size_bytes=file_path.stat().st_size
-                        ))
-    items.sort(key=lambda i: (i.category, i.name))
-    return items
+    return sorted(skills, key=lambda item: (item.category, item.name))
 
-def parse_cost_log() -> Tuple[List[CostRecord], CostSummary]:
+
+def list_memory_sources() -> list[CatalogItem]:
+    items: list[CatalogItem] = []
+    for directory, category in ((CONTEXTS_DIR, "context"), (RULES_DIR, "rule")):
+        if not directory.is_dir():
+            continue
+
+        for root, _, files in os.walk(directory):
+            for filename in files:
+                if not filename.endswith(".md"):
+                    continue
+
+                file_path = Path(root) / filename
+                text = read_text_head(file_path)
+                items.append(
+                    CatalogItem(
+                        name=filename,
+                        category=category,
+                        path=str(file_path.relative_to(PROJECT_ROOT)),
+                        title=filename,
+                        description=text.strip()[:300],
+                        tools=(),
+                        size_bytes=file_path.stat().st_size,
+                    )
+                )
+
+    return sorted(items, key=lambda item: (item.category, item.name))
+
+
+def parse_cost_log() -> tuple[list[CostRecord], CostSummary]:
     if not COST_LOG_PATH.is_file():
         return [], CostSummary(0.0, 0, 0, 0, 0, ())
 
-    records = []
-    skipped = 0
-    total_cost = 0.0
-    total_in = 0
-    total_out = 0
-    by_model = {}
+    records: list[CostRecord] = []
+    skipped_lines = 0
+    total_cost_usd = 0.0
+    total_input_tokens = 0
+    total_output_tokens = 0
+    by_model: dict[str, float] = {}
 
-    with open(COST_LOG_PATH, "r", encoding="utf-8", errors="replace") as f:
-        for line in f:
-            line = line.strip()
+    with COST_LOG_PATH.open("r", encoding="utf-8", errors="replace") as file:
+        for raw_line in file:
+            line = raw_line.strip()
             if not line:
                 continue
+
             try:
-                data = json.loads(line)
-                ts = data.get("timestamp", data.get("ts", ""))
+                record = parse_cost_record(line)
+            except (TypeError, ValueError, json.JSONDecodeError):
+                skipped_lines += 1
+                continue
 
-                # Model extraction
-                model = data.get("model", data.get("modelId", ""))
-                if not model and "message" in data:
-                    model = data["message"].get("model", "")
+            records.append(record)
+            total_cost_usd += record.cost_usd
+            total_input_tokens += record.input_tokens
+            total_output_tokens += record.output_tokens
+            by_model[record.model] = by_model.get(record.model, 0.0) + record.cost_usd
 
-                # Usage extraction
-                usage = data.get("usage", {})
-                if not usage and "message" in data:
-                    usage = data["message"].get("usage", {})
-
-                i_tok = int(usage.get("input_tokens", usage.get("inputTokens", 0)))
-                o_tok = int(usage.get("output_tokens", usage.get("outputTokens", 0)))
-
-                # Cost extraction
-                cost = float(data.get("cost_usd", data.get("cost", 0.0)))
-
-                # Heuristic pricing if missing
-                if cost == 0.0 and (i_tok > 0 or o_tok > 0):
-                    if "opus" in model:
-                        cost = (i_tok * 15.0 / 1e6) + (o_tok * 75.0 / 1e6)
-                    elif "haiku" in model:
-                        cost = (i_tok * 0.25 / 1e6) + (o_tok * 1.25 / 1e6)
-                    else: # sonnet default
-                        cost = (i_tok * 3.0 / 1e6) + (o_tok * 15.0 / 1e6)
-
-                rec = CostRecord(ts, model, i_tok, o_tok, cost)
-                records.append(rec)
-
-                total_cost += cost
-                total_in += i_tok
-                total_out += o_tok
-                by_model[model] = by_model.get(model, 0.0) + cost
-
-            except Exception:
-                skipped += 1
-
-    sorted_models = tuple(sorted(by_model.items(), key=lambda x: x[1], reverse=True))
     summary = CostSummary(
-        total_cost_usd=total_cost,
-        total_input_tokens=total_in,
-        total_output_tokens=total_out,
+        total_cost_usd=total_cost_usd,
+        total_input_tokens=total_input_tokens,
+        total_output_tokens=total_output_tokens,
         record_count=len(records),
-        skipped_lines=skipped,
-        by_model=sorted_models
+        skipped_lines=skipped_lines,
+        by_model=tuple(sorted(by_model.items(), key=lambda item: item[1], reverse=True)),
     )
     return records, summary
 
+
+def parse_cost_record(line: str) -> CostRecord:
+    raw = json.loads(line)
+    message = raw.get("message", {}) if isinstance(raw.get("message"), dict) else {}
+    usage = raw.get("usage", {}) if isinstance(raw.get("usage"), dict) else {}
+    if not usage:
+        usage = message.get("usage", {}) if isinstance(message.get("usage"), dict) else {}
+
+    timestamp = str(raw.get("timestamp", raw.get("ts", "")))
+    model = str(raw.get("model", raw.get("modelId", message.get("model", "unknown"))))
+    input_tokens = int(usage.get("input_tokens", usage.get("inputTokens", 0)))
+    output_tokens = int(usage.get("output_tokens", usage.get("outputTokens", 0)))
+    cost_usd = float(raw.get("cost_usd", raw.get("cost", 0.0)))
+    if cost_usd == 0.0 and (input_tokens > 0 or output_tokens > 0):
+        cost_usd = estimate_cost_usd(model, input_tokens, output_tokens)
+
+    return CostRecord(timestamp, model, input_tokens, output_tokens, cost_usd)
+
+
+def estimate_cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:
+    normalized_model = model.lower()
+    if "opus" in normalized_model:
+        return (input_tokens * 15.0 / 1_000_000) + (output_tokens * 75.0 / 1_000_000)
+    if "haiku" in normalized_model:
+        return (input_tokens * 0.25 / 1_000_000) + (output_tokens * 1.25 / 1_000_000)
+    return (input_tokens * 3.0 / 1_000_000) + (output_tokens * 15.0 / 1_000_000)
+
+
 def get_health() -> HealthStatus:
-    import datetime
-    now = datetime.datetime.now(datetime.timezone.utc).isoformat()
-
-    checks = []
+    checked_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    checks: list[dict[str, Any]] = []
     has_errors = False
-    has_warns = False
+    has_warnings = False
 
-    # Check Dirs
-    for d, name in [(AGENTS_DIR, "agents_dir"), (SKILLS_DIR, "skills_dir"), (PROJECT_ROOT, "project_root")]:
-        if d.is_dir():
+    for directory, name in ((PROJECT_ROOT, "project_root"), (AGENTS_DIR, "agents_dir"), (SKILLS_DIR, "skills_dir")):
+        if directory.is_dir():
             checks.append({"name": name, "status": "ok", "detail": "present"})
         else:
             checks.append({"name": name, "status": "error", "detail": "missing"})
             has_errors = True
 
-    # Check Cost log
     if COST_LOG_PATH.is_file():
         checks.append({"name": "cost_log", "status": "ok", "detail": "readable"})
     else:
         checks.append({"name": "cost_log", "status": "warn", "detail": "missing (optional)"})
-        has_warns = True
+        has_warnings = True
 
-    status = "error" if has_errors else ("warn" if has_warns else "ok")
-    return HealthStatus(status=status, checked_at=now, checks=tuple(checks))
+    status = "error" if has_errors else "warn" if has_warnings else "ok"
+    return HealthStatus(status=status, checked_at=checked_at, checks=tuple(checks))
 
-# Flask App
-def create_app():
+
+def token_matches(candidate: str) -> bool:
+    return bool(candidate) and secrets.compare_digest(AUTH_TOKEN, candidate)
+
+
+def is_authorized() -> bool:
+    cookie_token = request.cookies.get("vex_dashboard_token", "")
+    auth_header = request.headers.get("Authorization", "")
+    bearer_token = auth_header.removeprefix("Bearer ").strip() if auth_header.startswith("Bearer ") else ""
+    return token_matches(cookie_token) or token_matches(bearer_token)
+
+
+def query_token_matches() -> bool:
+    return token_matches(request.args.get("token", ""))
+
+
+def clean_request_url() -> str:
+    clean_args = [(key, value) for key, value in request.args.items(multi=True) if key != "token"]
+    query_string = urlencode(clean_args)
+    return f"{request.path}?{query_string}" if query_string else request.path
+
+
+def unauthorized_response() -> tuple[Response, int]:
+    return jsonify({"error": "Unauthorized", "hint": "Use Authorization: Bearer <token>"}), 401
+
+
+def print_startup_token() -> None:
+    print("\n" + "=" * 50)
+    print("VEX Dashboard running")
+    print(f"Access token: {AUTH_TOKEN}")
+    print(f"Use ?token={AUTH_TOKEN} or Authorization: Bearer {AUTH_TOKEN}")
+    print("=" * 50 + "\n")
+
+
+def create_app() -> Flask:
     app = Flask(__name__)
 
-# Generate auth token
-AUTH_TOKEN = secrets.token_urlsafe(16)
-print(f"
-{'='*50}")
-print(f"VEX Dashboard running!")
-print(f"Access token: {AUTH_TOKEN}")
-print(f"Use ?token={AUTH_TOKEN} or Authorization header")
-print(f"{'='*50}
-")
-
-def check_auth():
-    # Allow static files without auth
-    if request.path.startswith('/static/'):
-        return None
-        
-    token = request.args.get('token')
-    auth_header = request.headers.get('Authorization')
-    
-    if token == AUTH_TOKEN:
-        return None
-    
-    if auth_header and auth_header.startswith('Bearer ') and auth_header.split(' ')[1] == AUTH_TOKEN:
-        return None
-        
-    return jsonify({"error": "Unauthorized"}), 401
-
-@app.before_request
-def enforce_auth():
-    return check_auth()
-
+    @app.before_request
+    def enforce_auth() -> Response | tuple[Response, int] | None:
+        if request.path.startswith("/static/"):
+            return None
+        if is_authorized():
+            return None
+        if query_token_matches():
+            response = redirect(clean_request_url())
+            response.set_cookie("vex_dashboard_token", AUTH_TOKEN, httponly=True, samesite="Strict")
+            return response
+        return unauthorized_response()
 
     @app.after_request
-    def add_headers(response):
-        response.headers['X-Content-Type-Options'] = 'nosniff'
-        response.headers['X-Frame-Options'] = 'DENY'
+    def add_headers(response: Response) -> Response:
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' https://unpkg.com; style-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'"
         return response
 
     @app.route("/")
-    def index():
+    def index() -> str:
         agents = list_agents()
         skills = list_skills()
-        items = list_memory_sources()
-        _, cost_sum = parse_cost_log()
+        memory_items = list_memory_sources()
+        _, cost_summary = parse_cost_log()
         health = get_health()
         return render_template(
             "overview.html",
             agents_count=len(agents),
             skills_count=len(skills),
-            memory_count=len(items),
-            cost_summary=cost_sum,
-            health=health
+            memory_count=len(memory_items),
+            cost_summary=cost_summary,
+            health=health,
         )
 
     @app.route("/agents")
-    def agents_route():
-        agents = list_agents()
-        return render_template("agents.html", agents=agents)
+    def agents_route() -> str:
+        return render_template("agents.html", agents=list_agents())
 
     @app.route("/skills")
-    def skills_route():
-        skills = list_skills()
-        return render_template("skills.html", skills=skills)
+    def skills_route() -> str:
+        return render_template("skills.html", skills=list_skills())
 
     @app.route("/costs")
-    def costs_route():
-        records, summary = parse_cost_log()
-        recent = sorted(records, key=lambda x: x.timestamp, reverse=True)[:50]
-        return render_template("costs.html", cost_summary=summary, recent_records=recent)
+    def costs_route() -> str:
+        records, cost_summary = parse_cost_log()
+        recent_records = sorted(records, key=lambda record: record.timestamp, reverse=True)[:50]
+        return render_template("costs.html", cost_summary=cost_summary, recent_records=recent_records)
 
     @app.route("/memory")
-    def memory_route():
-        items = list_memory_sources()
-        return render_template("memory.html", memory_items=items)
+    def memory_route() -> str:
+        return render_template("memory.html", memory_items=list_memory_sources())
 
     @app.route("/health")
-    def health_route():
+    def health_route() -> Response | str:
         health = get_health()
         if request.headers.get("HX-Request"):
             return render_template("health_partial.html", health=health)
-        if request.headers.get("Accept", "").startswith("application/json"):
-            return jsonify({
-                "status": health.status,
-                "checked_at": health.checked_at,
-                "checks": health.checks
-            })
+        if "application/json" in request.headers.get("Accept", ""):
+            return jsonify(
+                {
+                    "status": health.status,
+                    "checked_at": health.checked_at,
+                    "checks": list(health.checks),
+                }
+            )
         return render_template("health_partial.html", health=health)
 
+    print_startup_token()
     return app
 
+
 if __name__ == "__main__":
-    app = create_app()
+    dashboard_app = create_app()
     print("Starting VEX dashboard on http://127.0.0.1:7777")
-    app.run(host="127.0.0.1", port=7777, debug=False)
+    dashboard_app.run(host="127.0.0.1", port=7777, debug=False, threaded=True)

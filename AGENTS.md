@@ -1,6 +1,6 @@
 # VEX Agent Orchestration Guide
 
-VEX agents are small, typed roles that operate through harness adapters. Claude Code is the first supported target; other harnesses must implement the same manifest contract before receiving first-class packs.
+VEX includes 35 agent definitions. VEX agents are small, typed roles that operate through harness adapters. Claude Code is the first supported target; other harnesses must implement the same manifest contract before receiving first-class packs.
 
 ## Agent groups
 

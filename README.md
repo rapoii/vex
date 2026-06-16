@@ -9,6 +9,7 @@ VEX is a free, MIT-licensed agent harness system for building, testing, routing,
 
 ## Features
 
+- **Verified pack size**: 35 agents, 41 skills, and 27 rules in this repository.
 - **Claude Code first**: agents, skills, commands, rules, hooks, and contexts optimized for Claude Code.
 - **Auto-skill generation**: mine repeated workflows and convert them into tested reusable skills.
 - **Cost intelligence**: estimate, track, and compare model/tool spend before and after runs.
