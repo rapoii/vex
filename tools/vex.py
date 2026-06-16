@@ -24,6 +24,8 @@ COMMAND_MAP = {
     "optimize": ("python", TOOLS_DIR / "vex_optimize.py"),
     "dashboard": ("python", REPO_ROOT / "dashboard" / "server.py"),
     "install": ("bash", REPO_ROOT / "install.sh"),
+    "repair": ("python", TOOLS_DIR / "vex_repair.py"),
+    "uninstall": ("python", TOOLS_DIR / "vex_uninstall.py"),
 }
 
 def print_json(data):
@@ -58,6 +60,50 @@ def cmd_doctor(args):
     checks = []
     ok = True
 
+    claude_dir = Path.home() / ".claude"
+
+    # 1. Check if .claude/ directory exists
+    has_claude_dir = claude_dir.exists()
+    checks.append({"name": "claude_dir_exists", "ok": has_claude_dir})
+    if not has_claude_dir: ok = False
+
+    # 2. Check if required files/dirs are present in ~/.claude/
+    required_paths = {
+        "AGENTS_md_exists": "AGENTS.md",
+        "skills_dir_exists": "skills",
+        "commands_dir_exists": "commands",
+        "rules_dir_exists": "rules",
+        "hooks_dir_exists": "hooks"
+    }
+
+    for check_name, path in required_paths.items():
+        has_path = (claude_dir / path).exists()
+        checks.append({"name": check_name, "ok": has_path})
+        if not has_path: ok = False
+
+    # 3. Check if Python tools are importable
+    tools_importable = True
+    try:
+        import argparse, json, os, sys, shutil, stat
+    except ImportError:
+        tools_importable = False
+    checks.append({"name": "python_tools_importable", "ok": tools_importable})
+    if not tools_importable: ok = False
+
+    # 4. Check if config files are valid JSON
+    config_valid = True
+    for conf_file in ["settings.json", "plugin.json"]:
+        p = claude_dir / conf_file
+        if p.exists():
+            try:
+                with open(p, 'r') as f:
+                    json.load(f)
+            except Exception:
+                config_valid = False
+                break
+    checks.append({"name": "config_json_valid", "ok": config_valid})
+    if not config_valid: ok = False
+
     # Check config/manifests exist
     config_dir = REPO_ROOT / "config"
     has_config = config_dir.exists()
@@ -82,7 +128,9 @@ def cmd_doctor(args):
     print(f"\033[1;36mVEX Doctor\033[0m")
     for check in checks:
         icon = "✅" if check["ok"] else "❌"
-        print(f"{icon} {check['name']}")
+        # Determine status
+        status = "OK" if check["ok"] else "ERROR"
+        print(f"{icon} [{status}] {check['name']}")
 
     return 0 if ok else 1
 
@@ -171,8 +219,15 @@ def main():
         cmd_target = str(mapping[1])
         cmd_extra = mapping[2:] if len(mapping) > 2 else ()
 
+        # Forward global flags
+        forward_args = []
+        if args.json:
+            forward_args.append("--json")
+        if getattr(args, "yes", False):
+            forward_args.append("--yes")
+
         # Build full command
-        full_cmd = [cmd_runner, cmd_target] + list(cmd_extra) + unknown_args
+        full_cmd = [cmd_runner, cmd_target] + list(cmd_extra) + forward_args + unknown_args
 
         if args.verbose:
             print(f"[VEX] Dispatching: {' '.join(full_cmd)}", file=sys.stderr)
