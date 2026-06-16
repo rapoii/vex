@@ -16,10 +16,24 @@ from typing import Any
 
 
 DEFAULT_DB_NAME = "vex-sessions.db"
+DEFAULT_RETENTION_DAYS = 30
 
 
 def vex_home() -> Path:
     return Path(os.environ.get("VEX_HOME", Path.home() / ".claude")).expanduser()
+
+
+def retention_days() -> int:
+    raw = os.environ.get("VEX_SESSION_RETENTION_DAYS")
+    if raw is None:
+        return DEFAULT_RETENTION_DAYS
+    try:
+        days = int(raw)
+    except ValueError as exc:
+        raise ValueError("VEX_SESSION_RETENTION_DAYS must be an integer") from exc
+    if days < 0:
+        raise ValueError("VEX_SESSION_RETENTION_DAYS must be non-negative")
+    return days
 
 
 def db_path() -> Path:
@@ -237,15 +251,48 @@ def run_query(sql: str) -> list[dict[str, Any]]:
         return [dict(row) for row in conn.execute(sql)]
 
 
-def export_sessions(fmt: str) -> int:
-    rows = list_sessions(None, None)
-    if fmt == "json":
-        print_json(json_envelope(True, "sessions export", {"sessions": rows}))
-        return 0
+def session_cutoff(days: int) -> str:
+    return (datetime.now(timezone.utc) - timedelta(days=days)).isoformat()
+
+
+def prune_sessions(days: int) -> dict[str, int]:
+    init_db()
+    cutoff = session_cutoff(days)
+    with sqlite3.connect(db_path()) as conn:
+        ids = [row[0] for row in conn.execute("SELECT id FROM sessions WHERE COALESCE(end, start, '') < ?", (cutoff,))]
+        if not ids:
+            return {"sessions": 0, "events": 0, "files_changed": 0, "days": days}
+        placeholders = ",".join("?" for _ in ids)
+        events = conn.execute(f"DELETE FROM events WHERE session_id IN ({placeholders})", ids).rowcount
+        files = conn.execute(f"DELETE FROM files_changed WHERE session_id IN ({placeholders})", ids).rowcount
+        sessions = conn.execute(f"DELETE FROM sessions WHERE id IN ({placeholders})", ids).rowcount
+        return {"sessions": sessions, "events": events, "files_changed": files, "days": days}
+
+
+def export_csv(rows: list[dict[str, Any]]) -> None:
     fieldnames = ["id", "start", "end", "project", "model", "cost", "tokens_in", "tokens_out"]
     writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames)
     writer.writeheader()
     writer.writerows(rows)
+
+
+def export_markdown(rows: list[dict[str, Any]]) -> None:
+    fieldnames = ["id", "start", "end", "project", "model", "cost", "tokens_in", "tokens_out"]
+    print("| " + " | ".join(fieldnames) + " |")
+    print("| " + " | ".join("---" for _ in fieldnames) + " |")
+    for row in rows:
+        values = [str(row.get(field) if row.get(field) is not None else "") for field in fieldnames]
+        print("| " + " | ".join(value.replace("|", "\\|") for value in values) + " |")
+
+
+def export_sessions(fmt: str) -> int:
+    rows = list_sessions(None, None)
+    if fmt == "json":
+        print_json(json_envelope(True, "sessions export", {"sessions": rows}))
+    elif fmt == "csv":
+        export_csv(rows)
+    else:
+        export_markdown(rows)
     return 0
 
 
@@ -264,8 +311,11 @@ def main() -> int:
     query = sub.add_parser("query")
     query.add_argument("sql")
     query.add_argument("--json", action="store_true")
+    prune = sub.add_parser("prune")
+    prune.add_argument("--days", type=int)
+    prune.add_argument("--json", action="store_true")
     export = sub.add_parser("export")
-    export.add_argument("--format", choices=["csv", "json"], default="json")
+    export.add_argument("--format", choices=["csv", "json", "markdown"], default="json")
     args = parser.parse_args()
 
     try:
@@ -286,6 +336,13 @@ def main() -> int:
         if args.command == "query":
             data = {"rows": run_query(args.sql)}
             print_json(json_envelope(True, "sessions query", data)) if args.json else print(json.dumps(data, indent=2))
+            return 0
+        if args.command == "prune":
+            days = args.days if args.days is not None else retention_days()
+            if days < 0:
+                raise ValueError("retention days must be non-negative")
+            data = prune_sessions(days)
+            print_json(json_envelope(True, "sessions prune", data)) if args.json else print(data)
             return 0
         if args.command == "export":
             return export_sessions(args.format)

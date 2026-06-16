@@ -7,6 +7,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEFAULT_VEX_HOME="$HOME/.vex"
 VEX_HOME="${VEX_HOME:-$DEFAULT_VEX_HOME}"
 PROFILE="${PROFILE:-developer}"
+COMPONENTS="${COMPONENTS:-all}"
 DRY_RUN=false
 UNINSTALL=false
 
@@ -72,6 +73,53 @@ validate_profile() {
     fi
 }
 
+filter_includes() {
+    local profile="$1"
+    cd "$SCRIPT_DIR" || exit 1
+    COMPONENTS="$COMPONENTS" "$PYTHON_CMD" -c "
+import json, os, sys
+
+valid_components = {
+    'adapters', 'agents', 'commands', 'config', 'contexts',
+    'hooks', 'marketplace', 'rules', 'skills', 'tools'
+}
+components = os.environ.get('COMPONENTS', 'all')
+selected = None
+
+if components != 'all':
+    parts = [part.strip() for part in components.split(',')]
+    if any(not part for part in parts):
+        print('Error: --components contains an empty component', file=sys.stderr)
+        sys.exit(1)
+    unknown = sorted(set(parts) - valid_components)
+    if unknown:
+        print(f\"Error: Unknown component(s): {', '.join(unknown)}\", file=sys.stderr)
+        sys.exit(1)
+    selected = set(parts)
+
+try:
+    with open('config/profiles.json') as f:
+        data = json.load(f)
+    profiles = data.get('profiles', {})
+    if '$profile' not in profiles:
+        print(f\"Error: Profile '{'$profile'}' not found in profiles.json\", file=sys.stderr)
+        sys.exit(1)
+    for item in profiles['$profile'].get('include', []):
+        component = item.split('/', 1)[0]
+        if selected is None or component in selected:
+            print(item)
+except Exception as e:
+    print(f\"Error parsing profiles.json: {e}\", file=sys.stderr)
+    sys.exit(1)
+"
+}
+
+validate_components() {
+    if ! filter_includes "$PROFILE" >/dev/null; then
+        exit 1
+    fi
+}
+
 validate_vex_home() {
     if [[ "$VEX_HOME" == *$'\n'* || "$VEX_HOME" == *$'\r'* ]]; then
         err "Invalid VEX_HOME: control characters are not allowed"
@@ -98,10 +146,12 @@ Usage:
   bash install.sh [OPTIONS]
 
 Options:
-  --profile NAME    Install for specific profile (default: developer)
-  --dry-run         Show what would be done without making changes
-  --uninstall       Remove VEX tools
-  --help            Show this help message
+  --profile NAME     Install for specific profile (default: developer)
+  --components LIST  Install selected components only (default: all)
+                     Example: --components agents,skills,rules
+  --dry-run          Show what would be done without making changes
+  --uninstall        Remove VEX tools
+  --help             Show this help message
 
 Environment:
   VEX_HOME          VEX home directory (default: ~/.vex)
@@ -112,6 +162,7 @@ EOF
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --profile)  PROFILE="$2"; shift 2 ;;
+        --components) COMPONENTS="$2"; shift 2 ;;
         --dry-run)  DRY_RUN=true; shift ;;
         --uninstall) UNINSTALL=true; shift ;;
         --help)     usage ;;
@@ -120,6 +171,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 validate_profile
+validate_components
 validate_vex_home
 
 TOOLS_DEST="$VEX_HOME/tools"
@@ -128,10 +180,11 @@ print_dry_run_install() {
     warn "DRY RUN — no changes will be made"
     echo ""
     echo "Would install components for profile: $PROFILE"
+    echo "Selected components: $COMPONENTS"
     echo ""
 
     local includes
-    includes=$(get_includes "$PROFILE" | tr -d '\r')
+    includes=$(filter_includes "$PROFILE" | tr -d '\r')
 
     for item in $includes; do
         if [[ -f "$SCRIPT_DIR/$item" ]]; then
@@ -179,6 +232,7 @@ WRAPPER
 do_install() {
     info "Installing VEX tools..."
     info "  Profile:    $PROFILE"
+    info "  Components: $COMPONENTS"
     info "  VEX Home:   $VEX_HOME"
     info "  Source:     $SCRIPT_DIR"
 
@@ -188,7 +242,7 @@ do_install() {
     fi
 
     local includes
-    includes=$(get_includes "$PROFILE" | tr -d '\r')
+    includes=$(filter_includes "$PROFILE" | tr -d '\r')
 
     for item in $includes; do
         copy_component "$item"
@@ -244,6 +298,7 @@ PATH
     echo ""
     echo "  VEX Home:    $VEX_HOME/"
     echo "  Profile:     $PROFILE"
+    echo "  Components:  $COMPONENTS"
     echo ""
     echo "  Quick start:"
     echo "    vex --help"
@@ -261,6 +316,7 @@ do_uninstall() {
         warn "DRY RUN — no changes will be made"
         echo ""
         echo "Would remove installed components for profile $PROFILE"
+        echo "Selected components: $COMPONENTS"
         echo "  (config and data in $VEX_HOME preserved, unless explicitly removed)"
         return 0
     fi
@@ -268,7 +324,7 @@ do_uninstall() {
     validate_uninstall_target
 
     local includes
-    includes=$(get_includes "$PROFILE" | tr -d '\r')
+    includes=$(filter_includes "$PROFILE" | tr -d '\r')
 
     for item in $includes; do
         if [[ -e "$VEX_HOME/$item" ]]; then

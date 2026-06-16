@@ -14,6 +14,13 @@ from pathlib import Path
 TOOLS_DIR = Path(__file__).parent.resolve()
 REPO_ROOT = TOOLS_DIR.parent.resolve()
 
+
+def agent_data_home():
+    return Path(os.environ.get("VEX_AGENT_DATA_HOME", Path.home() / ".claude")).expanduser()
+
+
+DATA_COMMANDS = {"hooks", "instinct", "memory", "optimize", "sessions"}
+
 COMMAND_MAP = {
     "skill": ("python", TOOLS_DIR / "vex_skill_gen.py"),
     "skill-create": ("python", TOOLS_DIR / "vex_skill_create.py"),
@@ -43,7 +50,8 @@ def cmd_status(args):
         "command": "status",
         "data": {
             "root": str(REPO_ROOT),
-            "tools_dir": str(TOOLS_DIR)
+            "tools_dir": str(TOOLS_DIR),
+            "data_home": str(agent_data_home())
         }
     }
 
