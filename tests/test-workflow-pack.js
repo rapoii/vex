@@ -9,11 +9,19 @@ const REQUIRED_SKILLS = [
   ['skills/workflow/subagent-development/SKILL.md', 'subagent-development', 150],
   ['skills/workflow/worktree-isolation/SKILL.md', 'worktree-isolation', 100],
   ['skills/workflow/strict-tdd/SKILL.md', 'strict-tdd', 100],
+  ['skills/workflow/verification-before-completion/SKILL.md', 'verification-before-completion', 120],
+  ['skills/workflow/finishing-development-branch/SKILL.md', 'finishing-development-branch', 120],
+  ['skills/workflow/requesting-code-review/SKILL.md', 'requesting-code-review', 100],
+  ['skills/workflow/dispatching-parallel-agents/SKILL.md', 'dispatching-parallel-agents', 120],
 ];
 
 const REQUIRED_AGENTS = [
   ['agents/core/brainstormer.md', 'brainstormer'],
   ['agents/core/subagent-coordinator.md', 'subagent-coordinator'],
+  ['agents/core/e2e-runner.md', 'e2e-runner'],
+  ['agents/core/docs-lookup.md', 'docs-lookup'],
+  ['agents/domain/database-reviewer.md', 'database-reviewer'],
+  ['agents/domain/mle-reviewer.md', 'mle-reviewer'],
 ];
 
 let passed = 0;
@@ -77,6 +85,10 @@ test('AGENTS.md routes new workflow agents', () => {
   const content = readProjectFile('AGENTS.md');
   assert.match(content, /brainstormer/, 'AGENTS.md must mention brainstormer');
   assert.match(content, /subagent-coordinator/, 'AGENTS.md must mention subagent-coordinator');
+  assert.match(content, /e2e-runner/, 'AGENTS.md must mention e2e-runner');
+  assert.match(content, /docs-lookup/, 'AGENTS.md must mention docs-lookup');
+  assert.match(content, /database-reviewer/, 'AGENTS.md must mention database-reviewer');
+  assert.match(content, /mle-reviewer/, 'AGENTS.md must mention mle-reviewer');
 });
 
 console.log(`\nResults: ${passed} passed, ${failed} failed`);

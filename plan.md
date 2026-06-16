@@ -1,154 +1,167 @@
-# VEX Fix Plan — Pre-Release v1.0.0
+# VEX Fix Plan v2 — Full Audit Results
 
 **Date:** 2026-06-16
-**Source:** Full audit against ECC (ecc.tools, affaan-m/ecc) + Superpowers (obra/superpowers)
-**Status:** PLANNING
+**Sources:** ecc.tools, github.com/affaan-m/ecc, github.com/obra/superpowers
+**Method:** All data from actual command output or browser extraction. No hallucination.
 
 ---
 
-## Problem Summary
+## Current VEX State (Verified)
 
-VEX has solid infrastructure (192 files, 9 working Python tools, 2,904 lines of real code) tapi:
-- **22/41 skills (54%)** = template stubs (54 lines, generic content)
-- **32/35 agents (91%)** = identical 34-line templates
-- **7/32 features** = missing vs competitors
-- **Tests** = 7 failures, 2 errors
-- **install.sh profile** = only "default", no minimal/core/full tiers
+| Component | Count | Lines | Status |
+|-----------|-------|-------|--------|
+| Files | 200 | — | ✅ |
+| Agents | 35 (12 core, 10 domain, 13 language) | 71-139 each | ✅ Real content |
+| Skills | 44 (6 auto, 1 meta, 8 opt, 8 ref, 7 sec, 14 wf) | 87-522 each | ✅ Real content |
+| Rules | 27 (11 frameworks) | — | ✅ |
+| Tools | 12 Python modules | 4,757 total | ✅ All compile |
+| Tests | 45 | — | ✅ 100% pass |
+| Commands | 10 | — | ✅ |
+| Contexts | 5 | — | ✅ |
+| Hooks | 6 files (4 scripts) | — | ⚠️ session-start/summary are 1-line stubs |
+| Adapters | 7 harnesses | — | ✅ JSON valid |
+| Dashboard | Flask web app | 396 lines | ✅ Working |
+| Marketplace | catalog + installer | — | ✅ Clean data |
+| Install profiles | 5 profiles | — | ✅ |
+
+---
+
+## Competitor State (Verified from live repos)
+
+### ECC (github.com/affaan-m/ecc)
+
+| Feature | ECC Count |
+|---------|-----------|
+| Skills | 271 |
+| Agents | 67 |
+| Commands | 92 legacy shims |
+| Harnesses | 11+ (Claude Code, Codex, Cursor, OpenCode, Gemini CLI, Zed, Copilot, Antigravity, JoyCode, Qwen, Grok) |
+| Hook events | 8 (Claude Code), 15 (Cursor), 11 (OpenCode) |
+| Install profiles | minimal, core, full |
+| Dashboard | Tkinter desktop (dark/light, font, tabs, search) |
+| i18n | 12 languages |
+| Hook runtime | ECC_HOOK_PROFILE, ECC_DISABLED_HOOKS, ECC_SESSION_START_MAX_CHARS |
+| Session store | SQLite |
+| Continuous learning | Instinct system with confidence scoring |
+| AgentShield | 102 rules, standalone scanner |
+| Doctor/repair | ✅ |
+
+### Superpowers (github.com/obra/superpowers)
+
+| Feature | Superpowers Count |
+|---------|-------------------|
+| Skills | 14 |
+| Harnesses | 8 (Claude Code, Codex CLI/App, Factory Droid, Gemini CLI, OpenCode, Cursor, Copilot CLI) |
+| TDD | Strict RED-GREEN-REFACTOR, deletes pre-test code |
+| Subagent dev | Fresh subagent per task, two-stage review |
+| Worktree isolation | Auto worktree + branch per task |
+| Brainstorming | Socratic design refinement |
+| Pipeline | brainstorm → worktree → plans → execute → TDD → review → finish |
+
+---
+
+## Gap Analysis (Verified)
+
+### ✅ VEX Has (competitors don't)
+
+| Feature | VEX | ECC | Superpowers |
+|---------|-----|-----|-------------|
+| Auto-skill generation tool | ✅ | ❌ | ❌ |
+| Cross-project memory (knowledge graph) | ✅ | ❌ | ❌ |
+| Cost intelligence (budgets, tracking, charts) | ✅ | Pro only | ❌ |
+| Unified adapter layer (7 harnesses, 1 installer) | ✅ | Per-harness | Per-harness |
+| Skill testing framework | ✅ | ❌ | ❌ |
+| Decentralized marketplace (GitHub Releases) | ✅ | GitHub App | ❌ |
+| Token optimization (4 skills + tool) | ✅ | Partial | ❌ |
+
+### ❌ VEX Missing vs ECC
+
+| Gap | ECC | VEX | Priority |
+|-----|-----|-----|----------|
+| Skill count | 271 | 44 | 🟡 Scale — VEX has quality, ECC has quantity |
+| Agent count | 67 | 35 | 🟡 Missing: e2e-runner, docs-lookup, chief-of-staff, mle-reviewer, database-reviewer, etc. |
+| Command count | 92 | 10 | 🟡 Legacy shims — not critical |
+| Harness count | 11+ | 7 | 🟡 Missing: Antigravity, JoyCode, Qwen, Grok |
+| i18n (12 languages) | ✅ | ❌ | 🟡 Nice-to-have |
+| Hook event types | 8-15 per harness | 4 basic | 🔴 Hook system shallow |
+| Dashboard features | Tkinter (tabs, search, font, themes) | Flask (basic routes) | 🟡 Different approach, missing search/filter |
+| AgentShield (standalone scanner) | ✅ | ❌ | 🟡 vex_security.py exists but not standalone package |
+| Hook runtime env vars | ECC_HOOK_PROFILE + 3 more | profiles.json only | 🟡 Missing env var controls |
+| Session store | SQLite | ❌ | 🟡 vex_sessions.py exists but not integrated |
+| Continuous learning | Instinct system (confidence scoring, import/export/evolve/prune) | vex_instinct.py (basic) | 🟡 Missing import/export/evolve/prune commands |
+
+### ❌ VEX Missing vs Superpowers
+
+| Gap | Superpowers | VEX | Priority |
+|-----|-------------|-----|----------|
+| Strict TDD enforcement (deletes pre-test code) | ✅ | ⚠️ skill exists, not enforced | 🔴 Core differentiator |
+| Full pipeline integration | 7-step pipeline connected | Skills exist but disconnected | 🔴 Workflow gap |
+| Factory Droid harness | ✅ | ❌ | 🟢 Niche |
+| Verification-before-completion skill | ✅ | ❌ | 🟡 Implicit in TDD |
+
+### ⚠️ VEX Has But Weak
+
+| Component | Issue | Fix |
+|-----------|-------|-----|
+| hooks/scripts/session-start.py | 1-line stub | Implement actual session tracking |
+| hooks/scripts/session-summary.py | 1-line stub | Implement actual summary generation |
+| hooks event types | Only 4 (PreToolUse, PostToolUse, Stop, SessionStart) | Add more event types |
+| 3 broken-path directories | `C:Usersrafivex-project*` phantom dirs | Delete |
+| install.sh | Unstaged changes | Commit |
 
 ---
 
 ## Fix Plan
 
-### Phase A: Depth — Rewrite Template Content [HIGH PRIORITY]
+### Phase 1: Cleanup (Quick Wins)
 
-**A1. Rewrite 22 stub skills (54 lines → 100-300 lines real content)**
-- Priority: workflow skills first (most used), then security, then reference
-- Each skill needs: real triggers, step-by-step workflow, code examples, verification steps, pitfalls
-- Use ECC skills at ~/.claude/skills/ecc/ as reference for depth
+1. **Delete 3 phantom directories** at repo root (`C:Usersrafivex-project*`)
+2. **Commit install.sh changes**
+3. **Implement session-start.py** — actual session tracking (record start time, project, model)
+4. **Implement session-summary.py** — actual summary generation (duration, files changed, cost)
 
-Affected skills:
-```
-skills/automation/ci-cd-setup/SKILL.md
-skills/automation/docker-compose/SKILL.md
-skills/automation/github-actions/SKILL.md
-skills/automation/pre-commit-hooks/SKILL.md
-skills/automation/release-automation/SKILL.md
-skills/automation/test-automation/SKILL.md
-skills/optimization/bundle-optimizer/SKILL.md
-skills/optimization/context-window-manager/SKILL.md
-skills/optimization/performance-audit/SKILL.md
-skills/optimization/query-optimizer/SKILL.md
-skills/reference/database-patterns/SKILL.md
-skills/reference/fastapi-patterns/SKILL.md
-skills/reference/python-patterns/SKILL.md
-skills/reference/typescript-patterns/SKILL.md
-skills/security/auth-hardening/SKILL.md
-skills/security/dependency-audit/SKILL.md
-skills/security/secrets-scanning/SKILL.md
-skills/security/supply-chain-review/SKILL.md
-skills/workflow/deployment-flow/SKILL.md
-skills/workflow/feature-development/SKILL.md
-skills/workflow/migration-workflow/SKILL.md
-skills/workflow/release-workflow/SKILL.md
-```
+### Phase 2: Missing Skills (from Superpowers pipeline)
 
-**A2. Rewrite 32 template agents (34 lines → 80-150 lines real content)**
-- Each agent needs: unique workflow, domain-specific guidance, output format, escalation rules
-- Language agents need: language-specific review checklist, common pitfalls, build commands
-- Domain agents need: domain-specific tools, patterns, metrics
+5. **Create skills/workflow/verification-before-completion/SKILL.md** — verify fix actually works before declaring success
+6. **Create skills/workflow/finishing-development-branch/SKILL.md** — merge/PR/keep/discard decisions after worktree work
+7. **Create skills/workflow/requesting-code-review/SKILL.md** — how to request and structure code reviews
+8. **Create skills/workflow/dispatching-parallel-agents/SKILL.md** — concurrent subagent coordination
 
-Affected agents:
-```
-agents/core/architect.md, build-error-resolver.md, code-reviewer.md, doc-updater.md,
-harness-optimizer.md, loop-operator.md, planner.md, refactor-cleaner.md, security-reviewer.md, tdd-guide.md
-agents/domain/accessibility.md, api-designer.md, cloud-architect.md, database.md,
-data-engineer.md, devops.md, ml-engineer.md, mobile-dev.md, performance.md, seo.md
-agents/language/cpp-reviewer.md, csharp-reviewer.md, dart-reviewer.md, fsharp-reviewer.md,
-golang-reviewer.md, java-reviewer.md, kotlin-reviewer.md, php-reviewer.md, python-reviewer.md,
-ruby-reviewer.md, rust-reviewer.md, swift-reviewer.md, typescript-reviewer.md
-```
+### Phase 3: Missing Agents
 
-### Phase B: Missing Features [MEDIUM PRIORITY]
+9. **Create agents/core/e2e-runner.md** — end-to-end test specialist
+10. **Create agents/core/docs-lookup.md** — documentation search specialist
+11. **Create agents/domain/database-reviewer.md** — database code review
+12. **Create agents/domain/mle-reviewer.md** — ML engineering review
 
-**B1. Doctor/repair/uninstall CLI**
-- Add `vex doctor`, `vex repair`, `vex uninstall` to tools/vex.py
-- Doctor: check installation health (files present, tools working, config valid)
-- Repair: restore missing files, fix permissions
-- Uninstall: backup user data, remove VEX files
+### Phase 4: Hook System Enhancement
 
-**B2. Writing-skills guide (from Superpowers)**
-- Create skills/meta/writing-skills/SKILL.md
-- How to write good SKILL.md files
-- Testing anti-patterns reference
-- 100+ lines
+13. **Enhance hooks.json** — add more event types (PostToolUse, SessionEnd)
+14. **Add env var controls** — VEX_HOOK_PROFILE, VEX_DISABLED_HOOKS to vex_hooks.py
+15. **Implement hook runtime** — actually fire hooks on events
 
-**B3. Receiving-code-review (from Superpowers)**
-- Create skills/workflow/receiving-code-review/SKILL.md
-- How to respond to code review feedback
-- When to push back vs accept
-- 80+ lines
+### Phase 5: Integration
 
-**B4. Executing-plans skill (from Superpowers)**
-- Create skills/workflow/executing-plans/SKILL.md
-- Batch execution with human checkpoints
-- Progress tracking
-- 100+ lines
+16. **Connect skills into pipeline** — brainstorming → worktree → plans → execute → TDD → review → finish
+17. **Add search/filter to dashboard** — text search across agents/skills
+18. **Enhance vex doctor** — check hook system, adapters, marketplace
 
-**B5. Install profiles (minimal/developer/security/full)**
-- Update config/profiles.json with real component lists
-- Update install.sh to support --profile flag
-- minimal: core agents + essential skills
-- developer: agents + skills + rules + commands
-- security: agents + security skills + hooks
-- full: everything
+### Phase 6: Verification
 
-### Phase C: Fix Tests [MEDIUM PRIORITY]
-
-**C1. Fix test_tools.py syntax bug**
-- Line 11: `from tools from tools import vex_cost` → fix import
-
-**C2. Fix test failures**
-- Install tests: add missing `repair`/`uninstall` commands first (Phase B1)
-- Session tests: fix Windows PermissionError (use tempfile properly)
-
-**C3. Target: 80%+ test pass rate**
-
-### Phase D: Cleanup [LOW PRIORITY]
-
-**D1. Remove template boilerplate patterns**
-- Search for "Implement concrete workflows and best practices for"
-- Replace with real content or remove
-
-**D2. Update CHANGELOG.md**
-- Document all fixes
-
-**D3. Final verification**
-- All counts match README
-- All Python tools compile
-- All tests pass
-- Dashboard works
-- Install works
-
----
-
-## Execution Order
-
-1. **Phase A1 + A2** (parallel Claude Code workers — biggest task)
-2. **Phase B** (parallel workers — new features)
-3. **Phase C** (fix tests after features are in)
-4. **Phase D** (cleanup + final verification)
-5. **Git commit + push**
-6. **GitHub release v1.0.0**
+19. **Run all tests** — target 100% pass
+20. **Verify all counts match README**
+21. **Commit + push + GitHub release v1.0.0**
 
 ---
 
 ## Success Criteria
 
-- [ ] 0 template stub skills (all 41 have real content)
-- [ ] 0 template agents (all 35 have unique content)
-- [ ] All 32 features: ✅ or ⚠️ (no ❌ for critical)
-- [ ] Tests: 80%+ pass rate
-- [ ] Install profiles working (minimal/developer/security/full)
-- [ ] Doctor/repair/uninstall working
-- [ ] All counts verified and match README
-- [ ] No AI slop, no hallucinated claims
+- [ ] 0 phantom directories
+- [ ] 0 stub scripts (session-start, session-summary implemented)
+- [ ] 4 new skills (verification, finishing-branch, requesting-review, dispatching-parallel)
+- [ ] 4 new agents (e2e-runner, docs-lookup, database-reviewer, mle-reviewer)
+- [ ] Hook system enhanced (more events, env vars)
+- [ ] Pipeline connected (skills reference each other)
+- [ ] Dashboard has search/filter
+- [ ] All tests pass
+- [ ] All counts verified

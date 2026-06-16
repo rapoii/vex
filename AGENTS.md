@@ -1,6 +1,6 @@
 # VEX Agent Orchestration Guide
 
-VEX includes 35 agent definitions. VEX agents are small, typed roles that operate through harness adapters. Claude Code is the first supported target; other harnesses must implement the same manifest contract before receiving first-class packs.
+VEX includes 39 agent definitions. VEX agents are small, typed roles that operate through harness adapters. Claude Code is the first supported target; other harnesses must implement the same manifest contract before receiving first-class packs.
 
 ## Agent groups
 
@@ -10,7 +10,9 @@ VEX includes 35 agent definitions. VEX agents are small, typed roles that operat
 | Coordination | Split approved plans into safe agent batches | subagent-coordinator |
 | Build | Implement features and fixes | feature-builder, refactorer, migrator |
 | Quality | Review, test, and verify changes | code-reviewer, tdd-guide, e2e-runner |
+| Research | Find authoritative docs and source evidence | docs-lookup |
 | Safety | Check security and operational risk | security-reviewer, secret-scanner |
+| Domain | Review specialized implementation risks | database-reviewer, mle-reviewer, accessibility |
 | Intelligence | Improve harness behavior | skill-miner, cost-analyst, memory-curator |
 
 ## Default workflow
@@ -20,9 +22,12 @@ VEX includes 35 agent definitions. VEX agents are small, typed roles that operat
 3. Use `architect` for component boundaries, install paths, data flow, and cross-harness decisions.
 4. Use `tdd-guide` before adding behavior or validation logic.
 5. Use `subagent-coordinator` to split approved plans into fresh subagent tasks with batch checkpoints.
-6. Use implementation agents only after scope is clear.
-7. Use `code-reviewer` after code or docs change.
-8. Use `security-reviewer` before publishing, installing hooks, or changing trust boundaries.
+6. Use `docs-lookup` when current external API or framework behavior must be verified.
+7. Use implementation agents only after scope is clear.
+8. Use `database-reviewer` or `mle-reviewer` for specialized persistence or ML risk.
+9. Use `e2e-runner` when user-visible flows need proof.
+10. Use `code-reviewer` after code or docs change.
+11. Use `security-reviewer` before publishing, installing hooks, or changing trust boundaries.
 
 ## Parallelism
 

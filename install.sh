@@ -16,22 +16,19 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-TOOLS=(
-    vex.py
-    vex_skill_gen.py
-    vex_cost.py
-    vex_memory.py
-    vex_sessions.py
-    vex_security.py
-    vex_instinct.py
-    vex_hooks.py
-    vex_optimize.py
-)
-
 info()  { echo -e "${BLUE}[vex]${NC} $*"; }
 ok()    { echo -e "${GREEN}[vex]${NC} $*"; }
 warn()  { echo -e "${YELLOW}[vex]${NC} $*"; }
 err()   { echo -e "${RED}[vex]${NC} $*" >&2; }
+
+if command -v python3 &>/dev/null && python3 -c "import sys" 2>/dev/null; then
+    PYTHON_CMD="python3"
+elif command -v python &>/dev/null && python -c "import sys" 2>/dev/null; then
+    PYTHON_CMD="python"
+else
+    err "Python is required but not found."
+    exit 1
+fi
 
 backup_file() {
     local path="$1"
@@ -44,15 +41,39 @@ shell_quote() {
     printf '%q' "$1"
 }
 
+get_includes() {
+    local profile="$1"
+    cd "$SCRIPT_DIR" || exit 1
+    "$PYTHON_CMD" -c "
+import json, sys
+try:
+    with open('config/profiles.json') as f:
+        data = json.load(f)
+    profiles = data.get('profiles', {})
+    if '$profile' not in profiles:
+        print(f\"Error: Profile '{'$profile'}' not found in profiles.json\", file=sys.stderr)
+        sys.exit(1)
+    for item in profiles['$profile'].get('include', []):
+        print(item)
+except Exception as e:
+    print(f\"Error parsing profiles.json: {e}\", file=sys.stderr)
+    sys.exit(1)
+"
+}
+
 validate_profile() {
     if [[ ! "$PROFILE" =~ ^[A-Za-z0-9._-]+$ ]]; then
         err "Invalid profile name: $PROFILE"
         exit 1
     fi
+    # Check if we can get includes without error
+    if ! get_includes "$PROFILE" >/dev/null; then
+        exit 1
+    fi
 }
 
 validate_vex_home() {
-    if [[ "$VEX_HOME" == *$'\n'* || "$VEX_HOME" == *$'\r'* || "$VEX_HOME" == *$'\0'* ]]; then
+    if [[ "$VEX_HOME" == *$'\n'* || "$VEX_HOME" == *$'\r'* ]]; then
         err "Invalid VEX_HOME: control characters are not allowed"
         exit 1
     fi
@@ -101,55 +122,56 @@ done
 validate_profile
 validate_vex_home
 
-PROFILE_DIR="$HOME/.hermes/profiles/$PROFILE"
 TOOLS_DEST="$VEX_HOME/tools"
-CONFIG_DEST="$VEX_HOME/config"
-ADAPTERS_DEST="$VEX_HOME/adapters"
-MARKETPLACE_DEST="$VEX_HOME/marketplace"
-SKILLS_DEST="$PROFILE_DIR/skills"
 
 print_dry_run_install() {
     warn "DRY RUN — no changes will be made"
     echo ""
-    echo "Would create directories:"
-    echo "  $TOOLS_DEST"
-    echo "  $CONFIG_DEST"
-    echo "  $ADAPTERS_DEST"
-    echo "  $MARKETPLACE_DEST"
-    echo "  $SKILLS_DEST"
+    echo "Would install components for profile: $PROFILE"
     echo ""
-    echo "Would copy tools:"
-    for tool in "${TOOLS[@]}"; do
-        echo "  tools/$tool -> $TOOLS_DEST/"
+
+    local includes
+    includes=$(get_includes "$PROFILE" | tr -d '\r')
+
+    for item in $includes; do
+        if [[ -f "$SCRIPT_DIR/$item" ]]; then
+            echo "Would copy file: $item -> $VEX_HOME/$item"
+        elif [[ -d "$SCRIPT_DIR/$item" ]]; then
+            echo "Would copy dir:  $item/ -> $VEX_HOME/$item/"
+        else
+            echo "Warning: Component not found: $item"
+        fi
     done
-    echo ""
-    echo "Would copy directories:"
-    echo "  config/      -> $CONFIG_DEST/"
-    echo "  adapters/    -> $ADAPTERS_DEST/"
-    echo "  marketplace/ -> $MARKETPLACE_DEST/"
+
     echo ""
     echo "Would add to PATH:"
     echo "  $TOOLS_DEST"
     echo ""
-    echo "Would create wrapper scripts:"
-    for tool in "${TOOLS[@]}"; do
-        local name="${tool%.py}"
-        echo "  $TOOLS_DEST/$name"
-    done
+    echo "Would create wrapper scripts in $TOOLS_DEST"
 }
 
-copy_directory() {
-    local source_dir="$1"
-    local dest_dir="$2"
-    mkdir -p "$dest_dir"
-    cp -R "$source_dir/." "$dest_dir/"
+copy_component() {
+    local item="$1"
+    local src="$SCRIPT_DIR/$item"
+    local dest="$VEX_HOME/$item"
+
+    if [[ -f "$src" ]]; then
+        mkdir -p "$(dirname "$dest")"
+        backup_file "$dest"
+        cp "$src" "$dest"
+    elif [[ -d "$src" ]]; then
+        mkdir -p "$dest"
+        cp -R "$src/." "$dest/"
+    else
+        warn "Component not found, skipping: $item"
+    fi
 }
 
 create_wrapper() {
     local name="$1"
     cat > "$TOOLS_DEST/$name" <<WRAPPER
 #!/usr/bin/env bash
-exec python3 "$TOOLS_DEST/${name}.py" "\$@"
+exec "$PYTHON_CMD" "$TOOLS_DEST/${name}.py" "\$@"
 WRAPPER
     chmod +x "$TOOLS_DEST/$name"
 }
@@ -165,22 +187,23 @@ do_install() {
         return 0
     fi
 
-    mkdir -p "$TOOLS_DEST" "$CONFIG_DEST" "$ADAPTERS_DEST" "$MARKETPLACE_DEST" "$SKILLS_DEST"
+    local includes
+    includes=$(get_includes "$PROFILE" | tr -d '\r')
 
-    for tool in "${TOOLS[@]}"; do
-        backup_file "$TOOLS_DEST/$tool"
-        cp "$SCRIPT_DIR/tools/$tool" "$TOOLS_DEST/"
+    for item in $includes; do
+        copy_component "$item"
     done
 
-    copy_directory "$SCRIPT_DIR/config" "$CONFIG_DEST"
-    copy_directory "$SCRIPT_DIR/adapters" "$ADAPTERS_DEST"
-    copy_directory "$SCRIPT_DIR/marketplace" "$MARKETPLACE_DEST"
-
-    for tool in "${TOOLS[@]}"; do
-        create_wrapper "${tool%.py}"
-    done
-
-    chmod +x "$TOOLS_DEST"/*.py
+    # Create wrappers for any python scripts in tools/
+    if [[ -d "$TOOLS_DEST" ]]; then
+        for py_file in "$TOOLS_DEST"/*.py; do
+            if [[ -f "$py_file" ]]; then
+                name="$(basename "$py_file" .py)"
+                create_wrapper "$name"
+            fi
+        done
+        chmod +x "$TOOLS_DEST"/*.py
+    fi
 
     SHELL_RC=""
     if [[ -f "$HOME/.bashrc" ]]; then
@@ -206,19 +229,20 @@ PATH
     fi
 
     if [[ -d "/usr/local/bin" ]] && [[ -w "/usr/local/bin" ]]; then
-        for tool in "${TOOLS[@]}"; do
-            name="${tool%.py}"
-            ln -sf "$TOOLS_DEST/$name" "/usr/local/bin/$name" 2>/dev/null || true
-        done
+        if [[ -d "$TOOLS_DEST" ]]; then
+            for py_file in "$TOOLS_DEST"/*.py; do
+                if [[ -f "$py_file" ]]; then
+                    name="$(basename "$py_file" .py)"
+                    ln -sf "$TOOLS_DEST/$name" "/usr/local/bin/$name" 2>/dev/null || true
+                fi
+            done
+        fi
     fi
 
     echo ""
     ok "Installation complete!"
     echo ""
-    echo "  Tools:       $TOOLS_DEST/"
-    echo "  Config:      $CONFIG_DEST/"
-    echo "  Adapters:    $ADAPTERS_DEST/"
-    echo "  Marketplace: $MARKETPLACE_DEST/"
+    echo "  VEX Home:    $VEX_HOME/"
     echo "  Profile:     $PROFILE"
     echo ""
     echo "  Quick start:"
@@ -236,34 +260,37 @@ do_uninstall() {
     if $DRY_RUN; then
         warn "DRY RUN — no changes will be made"
         echo ""
-        echo "Would remove:"
-        echo "  $TOOLS_DEST/"
-        echo "  $ADAPTERS_DEST/"
-        echo "  $MARKETPLACE_DEST/"
-        echo "  (config and data in $VEX_HOME preserved)"
+        echo "Would remove installed components for profile $PROFILE"
+        echo "  (config and data in $VEX_HOME preserved, unless explicitly removed)"
         return 0
     fi
 
     validate_uninstall_target
 
-    for path in "$TOOLS_DEST" "$ADAPTERS_DEST" "$MARKETPLACE_DEST"; do
-        if [[ -d "$path" ]]; then
-            rm -rf "$path"
-            ok "Removed $path"
-        else
-            warn "Directory not found: $path"
+    local includes
+    includes=$(get_includes "$PROFILE" | tr -d '\r')
+
+    for item in $includes; do
+        if [[ -e "$VEX_HOME/$item" ]]; then
+            rm -rf "$VEX_HOME/$item"
+            ok "Removed $VEX_HOME/$item"
         fi
     done
 
-    for tool in "${TOOLS[@]}"; do
-        name="${tool%.py}"
-        if [[ -L "/usr/local/bin/$name" ]]; then
-            rm -f "/usr/local/bin/$name"
-            ok "Removed /usr/local/bin/$name"
-        fi
-    done
+    # Remove symlinks in /usr/local/bin
+    if [[ -d "$TOOLS_DEST" ]]; then
+        for py_file in "$TOOLS_DEST"/*.py; do
+            if [[ -f "$py_file" ]]; then
+                name="$(basename "$py_file" .py)"
+                if [[ -L "/usr/local/bin/$name" ]]; then
+                    rm -f "/usr/local/bin/$name"
+                    ok "Removed /usr/local/bin/$name"
+                fi
+            fi
+        done
+    fi
 
-    info "Preserved config and data directory: $VEX_HOME/"
+    info "Preserved remaining config and data in: $VEX_HOME/"
     info "To fully remove: rm -rf $VEX_HOME"
 
     SHELL_RC=""
