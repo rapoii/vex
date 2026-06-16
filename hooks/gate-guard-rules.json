@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "max_input_bytes": 1048576,
+  "block": [
+    {
+      "id": "GG-BLOCK-001",
+      "pattern": "(?i)\\brm\\s+-[^\\n]*[rf][^\\n]*\\s+/(?:\\s|$)",
+      "message": "Blocks recursive deletion of filesystem root"
+    },
+    {
+      "id": "GG-BLOCK-002",
+      "pattern": "(?i)\\brm\\s+-[^\\n]*[rf][^\\n]*\\s+(?:~|\\$HOME|%USERPROFILE%)\\b",
+      "message": "Blocks recursive deletion of home directory"
+    },
+    {
+      "id": "GG-BLOCK-003",
+      "pattern": "(?i)\\bgit\\s+push\\s+(?:[^\\n]*\\s)?(?:--force|-f|--force-with-lease)\\s+[^\\n]*(?:\\bmain\\b|\\bmaster\\b)",
+      "message": "Blocks force push to main or master"
+    },
+    {
+      "id": "GG-BLOCK-004",
+      "pattern": "(?i)\\bDROP\\s+TABLE\\b",
+      "message": "Blocks DROP TABLE command"
+    },
+    {
+      "id": "GG-BLOCK-005",
+      "pattern": "(?i)\\bkubectl\\s+delete\\s+namespace\\b",
+      "message": "Blocks Kubernetes namespace deletion"
+    },
+    {
+      "id": "GG-BLOCK-006",
+      "pattern": "(?i)\\bdd\\s+if=/dev/zero\\b",
+      "message": "Blocks disk overwrite with /dev/zero"
+    }
+  ],
+  "warn": [
+    {
+      "id": "GG-WARN-001",
+      "pattern": "(?i)(?:^|[;&|\\s])sudo(?:\\s|$)",
+      "message": "Warns on privilege elevation with sudo"
+    },
+    {
+      "id": "GG-WARN-002",
+      "pattern": "(?i)\\bchmod\\s+777\\b",
+      "message": "Warns on world-writable chmod"
+    },
+    {
+      "id": "GG-WARN-003",
+      "pattern": "(?i)\\bcurl\\b[^\\n]*\\|[^\\n]*\\bbash\\b",
+      "message": "Warns on curl piped to bash"
+    },
+    {
+      "id": "GG-WARN-004",
+      "pattern": "(?i)\\bwget\\b[^\\n]*-O-?[^\\n]*\\|[^\\n]*\\bsh\\b",
+      "message": "Warns on wget piped to sh"
+    },
+    {
+      "id": "GG-WARN-005",
+      "pattern": "(?i)\\beval\\s*\\(\\s*\\$\\([^\\n]+\\)\\s*\\)",
+      "message": "Warns on eval of command substitution"
+    }
+  ]
+}

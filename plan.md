@@ -1,109 +1,118 @@
-# VEX Fix Plan v3 — Remaining Weaknesses
+# VEX Fix Plan v4 — HIGH Priority Gaps
 
 **Date:** 2026-06-16
-**Source:** Honest self-audit after v1.0.0 release
-**Status:** PLANNING
+**Source:** Gap analysis v ECC + Superpowers
+**Method:** Claude Code + ECC active, kanban orkestra multi-agent swarm
+**Status:** EXECUTING
 
 ---
 
-## Weak Points to Fix
+## 6 HIGH Priority Gaps
 
-### 1. Hook System — Scripts Minimal [HIGH]
+### 1. AgentShield — Standalone Security Auditor [CRITICAL]
 
-**Current:** hooks.json has event types (PostToolUse, PreToolUse, Stop, SessionStart, SessionEnd) but hook scripts are stubs or minimal.
+**ECC reference:** `npx ecc-agentshield scan` — 1282 tests, 102 rules, secrets/permissions/hooks/MCP/agent config scanning
 
-**Fix:**
-- hooks/scripts/check-file-size.py — implement actual file size check (block >1MB writes)
-- hooks/scripts/validate-frontmatter.py — implement YAML frontmatter validation for SKILL.md/agent files
-- hooks/scripts/post-tool-use.py — NEW: log tool usage, track costs per tool call
-- hooks/scripts/stop.py — NEW: generate session summary on stop
-- Update hooks.json to reference all scripts properly
+**VEX plan:**
+- Create `tools/vex_shield.py` — standalone security auditor CLI
+- 102 security rules (reuse from vex_security.py, expand)
+- Scan modes: `vex shield scan [--target agents|hooks|skills|tools|all]`
+- Categories: secrets, permissions, hooks, agent config, dependency, supply-chain
+- Output: JSON report with CRITICAL/HIGH/MEDIUM/LOW findings
+- `vex shield report` — generate markdown report
+- `vex shield ci` — CI mode (exit 1 if CRITICAL found)
+- Only Python stdlib
 
-### 2. Dashboard Search — Not Implemented [HIGH]
+### 2. Skill Creator from Git History [CRITICAL]
 
-**Current:** Dashboard has routes for /, /agents, /skills, /costs, /memory, /health but NO /search endpoint.
+**ECC reference:** `/skill-create` — analyzes git history → generates SKILL.md
 
-**Fix:**
-- Add GET /search?q=<query> to dashboard/server.py
-- Search across agents, skills, commands, rules by name and description
-- Add search box to base.html template header
-- HTMX-powered: type to search, results update live
-- Filter by type (agent/skill/command/rule)
+**VEX plan:**
+- Create `tools/vex_skill_create.py` — git history → SKILL.md generator
+- Analyze recent commits (last N days/files)
+- Extract common patterns: files frequently changed together, recurring commands, fix patterns
+- Generate SKILL.md with: triggers, workflow, code examples
+- CLI: `python tools/vex_skill_create.py [--days 30] [--output skills/]`
+- Only Python stdlib + git subprocess
 
-### 3. Pipeline Cross-References — Only 1 Skill Has Them [MEDIUM]
+### 3. Instinct Import/Evolve [CRITICAL]
 
-**Current:** Only executing-plans has "Next:" links. Other workflow skills are disconnected.
+**ECC reference:** `/instinct-import`, `/instinct-export`, `/evolve` — share and cluster instincts
 
-**Fix:** Add "Next Step" and "Previous Step" links to ALL workflow skills:
-- brainstorming → worktree-isolation
-- worktree-isolation → executing-plans OR subagent-development
-- executing-plans → strict-tdd OR tdd-workflow
-- strict-tdd → code-review-flow
-- code-review-flow → receiving-code-review
-- receiving-code-review → verification-before-completion
-- verification-before-completion → finishing-development-branch
-- bug-fix-flow → verification-before-completion
-- feature-development → code-review-flow
-- deployment-flow → verification-before-completion
-- release-workflow → deployment-flow
-- subagent-development → code-review-flow
-- dispatching-parallel-agents → subagent-development
+**VEX plan:**
+- Enhance `tools/vex_instinct.py` with:
+  - `vex instinct export [--output instincts.json]` — export instincts to shareable JSON
+  - `vex instinct import <file>` — import instincts from JSON
+  - `vex instinct evolve` — cluster related instincts into skill candidates
+  - `vex instinct prune [--threshold 0.3]` — remove low-confidence instincts
+- Update vex.py CLI with new subcommands
 
-### 4. vex doctor — Checks Wrong Path [MEDIUM]
+### 4. GateGuard — Destructive Command Blocker [CRITICAL]
 
-**Current:** doctor checks ~/.claude/ (install path) but should also check project-local state.
+**ECC reference:** Gates destructive shell commands before execution
 
-**Fix:**
-- Add project-local checks: VEX project files present (agents/, skills/, tools/)
-- Add hook system check: hooks.json valid, all referenced scripts exist
-- Add adapter check: all adapter JSON files valid
-- Add marketplace check: catalog.json valid
-- Add dashboard check: server.py syntax OK
-- Add disk usage report
-- Fix: doctor should work both in installed mode AND project mode
+**VEX plan:**
+- Create `hooks/scripts/gate-guard.py` — block dangerous commands
+- Patterns to block: `rm -rf /`, `git push --force` to main, `DROP TABLE`, `kubectl delete`
+- Patterns to warn: `sudo`, `chmod 777`, `curl | bash`
+- Config: `hooks/gate-guard-rules.json` — customizable patterns
+- CLI: `vex guard status` — show blocked commands
+- Hook integration: fires on PreToolUse for Bash tool
 
-### 5. Dashboard Auth — Not Verified End-to-End [LOW]
+### 5. Eval Harness — Verification Loops [CRITICAL]
 
-**Current:** Token auth exists in server.py but not tested.
+**ECC reference:** Verification loop evaluation with grader types, pass@k metrics
 
-**Fix:**
-- Verify token generation works
-- Verify unauthorized requests are blocked
-- Add test for auth flow
-- Document auth usage in dashboard/README.md
+**VEX plan:**
+- Create `tools/vex_eval.py` — evaluation harness
+- Run agent task multiple times, measure pass@k
+- Grader types: exact_match, contains, regex, llm_judge
+- CLI: `python tools/vex_eval.py run --task "fix bug" --iterations 5 --grader contains`
+- Output: pass@k score, average time, cost estimate
+- Only Python stdlib
 
-### 6. Hook Runtime Env Vars — Structure Only [LOW]
+### 6. AgentShield --opus (Red/Blue Team) [CRITICAL]
 
-**Current:** VEX_HOOK_PROFILE and VEX_DISABLED_HOOKS referenced in hooks.json but vex_hooks.py may not fully implement.
+**ECC reference:** 3 Claude Opus agents in adversarial pipeline
 
-**Fix:**
-- Verify vex_hooks.py reads env vars
-- Verify profile switching works
-- Verify disable mechanism works
-- Add tests
+**VEX plan:**
+- Create `tools/vex_redteam.py` — adversarial security analysis
+- Pipeline: Red Agent (find vulnerabilities) → Blue Agent (propose fixes) → Auditor Agent (verify)
+- CLI: `python tools/vex_redteam.py --target <dir> [--depth quick|deep]`
+- Output: adversarial report with attack vectors + defenses
+- Uses Claude Code proxy for agent calls
+- Only Python stdlib + subprocess (claude -p)
 
 ---
 
-## Execution Order
+## Execution
 
-1. **Hook scripts** (1) — implement real logic
-2. **Dashboard search** (2) — add /search endpoint + UI
-3. **Pipeline cross-refs** (3) — add links to all workflow skills
-4. **Doctor enhancement** (4) — fix path checks
-5. **Auth verification** (5) — test + document
-6. **Hook runtime verification** (6) — test env vars
-7. **Final test run** — 42/42 pass target
-8. **Commit + push**
+3 Claude Code workers (kanban swarm):
+
+| Worker | Tasks | Status |
+|--------|-------|--------|
+| **Security** | AgentShield (vex_shield.py) + GateGuard (gate-guard.py) | 🔄 |
+| **Intelligence** | Skill Creator (vex_skill_create.py) + Instinct Evolve (vex_instinct.py) | 🔄 |
+| **Verification** | Eval Harness (vex_eval.py) + Red/Blue Team (vex_redteam.py) | 🔄 |
+
+After all workers:
+- Verify all 6 tools compile + have CLI
+- Run tests (target: 50+ tests pass)
+- Update vex.py with new subcommands
+- Update AGENTS.md, README.md
+- Commit + push
 
 ---
 
 ## Success Criteria
 
-- [ ] All 4+ hook scripts have real implementation (not stubs)
-- [ ] Dashboard /search works (type to search agents/skills)
-- [ ] All 14 workflow skills have pipeline cross-references
-- [ ] vex doctor checks 12+ items (project + install)
-- [ ] Dashboard auth verified
-- [ ] Hook env vars verified
-- [ ] 42/42 tests pass
-- [ ] All changes committed + pushed
+- [ ] vex_shield.py — standalone auditor, 102 rules, scan/report/ci modes
+- [ ] vex_skill_create.py — git history → SKILL.md generator
+- [ ] vex_instinct.py — export/import/evolve/prune commands
+- [ ] gate-guard.py — blocks destructive commands, customizable rules
+- [ ] vex_eval.py — eval harness with pass@k metrics
+- [ ] vex_redteam.py — red/blue team adversarial pipeline
+- [ ] All tools compile + have argparse CLI
+- [ ] 50+ tests pass
+- [ ] vex.py updated with new subcommands
+- [ ] Committed + pushed

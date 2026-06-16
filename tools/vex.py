@@ -16,6 +16,7 @@ REPO_ROOT = TOOLS_DIR.parent.resolve()
 
 COMMAND_MAP = {
     "skill": ("python", TOOLS_DIR / "vex_skill_gen.py"),
+    "skill-create": ("python", TOOLS_DIR / "vex_skill_create.py"),
     "scan": ("python", TOOLS_DIR / "vex_skill_gen.py", "scan"),
     "generate": ("python", TOOLS_DIR / "vex_skill_gen.py", "generate"),
     "cost": ("python", TOOLS_DIR / "vex_cost.py"),
