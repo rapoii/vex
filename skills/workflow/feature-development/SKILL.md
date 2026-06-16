@@ -1,54 +1,96 @@
 ---
 name: feature-development
-description: Implement concrete workflows and best practices for feature-development.
+description: Workflows for feature development (branching strategy, PR workflow, feature flags).
 argument-hint: "[scope | target]"
 metadata:
   origin: VEX
+category: workflow
+triggers:
+  - "how to branch"
+  - "feature flag"
+  - "pr workflow"
+  - "feature-development"
 ---
 
-# feature-development
+# Feature Development
 
-Actionable steps and concrete examples for feature-development.
+Standardized workflows for creating branches, integrating code, and rolling out features using flags.
 
 ## When to Activate
-- Task involves feature development.
-- Reviewing or optimizing related code.
+- Task involves starting a new feature branch.
+- Configuring LaunchDarkly or custom feature flags.
+- Establishing PR templates and review rules.
 
-## Core Principles
-1. **Be specific**: Apply targeted changes rather than broad rewrites.
-2. **Verify locally**: Always test changes before committing.
-3. **Follow standards**: Adhere to established patterns for the domain.
+## How It Works
 
-## Actionable Steps
-1. **Analyze**: Use `grep` or code search to find relevant files.
-2. **Execute**: Apply the specific pattern or fix.
-3. **Validate**: Run tests, linters, or manual checks to confirm correctness.
+### Trunk-Based Development
+Prefer short-lived feature branches merged directly into `main` (trunk) over long-running release branches (GitFlow).
 
-## Code Examples
+```bash
+# Start a new feature
+git checkout main
+git pull origin main
+git checkout -b feat/add-user-profile
 
-### Pattern 1
-```javascript
-// Example implementation
-function process(data) {
-  // Validate input
-  if (!data) return null;
-  // Execute logic
-  return data.map(item => item.id);
+# Commit small, atomic changes
+git commit -m "feat: create profile UI component"
+git commit -m "feat: wire profile UI to API"
+```
+
+### Feature Flags
+Use feature flags to decouple deployment from release. This allows merging unfinished code to `main` safely.
+
+```typescript
+// Example using a simple feature flag service
+import { useFlags } from '@/lib/feature-flags';
+
+export function UserDashboard() {
+  const flags = useFlags();
+
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      {/* Code is deployed but hidden from users */}
+      {flags.ENABLE_NEW_PROFILE_UI ? (
+        <NewProfileView />
+      ) : (
+        <LegacyProfileView />
+      )}
+    </div>
+  );
 }
 ```
 
-### Verification Command
-```bash
-# Run tests for this specific module
-npm test -- feature-development
+### Pull Request Workflow
+1. Keep PRs small (under 400 lines of change).
+2. Write a clear description linking to the issue.
+3. Require CI checks to pass before merging.
+4. Require at least one peer review.
+
+```markdown
+# PR Template Example
+## What does this PR do?
+Implements the new user profile UI hidden behind the `ENABLE_NEW_PROFILE_UI` flag.
+
+## Testing Instructions
+1. Turn on flag in admin panel.
+2. Navigate to `/profile`.
+3. Verify avatar upload works.
+
+## Screenshots
+[Insert screenshot]
 ```
 
-## Common Pitfalls
-- Skipping validation steps.
-- Applying patterns where they don't fit the architecture.
-- Ignoring edge cases.
+## Verification Steps
+1. Verify feature branches live no longer than 2-3 days before merging.
+2. Test feature flags by toggling them on/off in the local environment and ensuring the application behaves as expected.
+3. Run `git log` to ensure commit messages follow conventional formats.
 
-## Verification Checklist
-- [ ] Code compiles/builds successfully.
-- [ ] Tests cover the new/modified logic.
-- [ ] No regression in related modules.
+## Common Pitfalls
+- **Feature Flag Debt**: Leaving old feature flags in the code long after 100% rollout. Add a task to remove the flag after the rollout is complete.
+- **Merge Conflicts**: Leaving branches open for weeks guarantees massive merge conflicts. Merge early and often using flags.
+- **Giant PRs**: Reviewers gloss over PRs larger than 500 lines. Break large features into smaller, reviewable chunks.
+
+## Related Skills
+- `deployment-flow`: How to deploy the code once merged.
+- `release-workflow`: How to tag and version the `main` branch.

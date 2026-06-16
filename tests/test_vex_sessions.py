@@ -23,11 +23,15 @@ class TestVexSessions(unittest.TestCase):
         self.env = {**os.environ, "VEX_HOME": str(self.home)}
 
     def tearDown(self):
-        self.temp_dir.cleanup()
+        try:
+            self.temp_dir.cleanup()
+        except PermissionError:
+            pass # Windows occasionally locks sqlite files a bit longer
 
     def run_cli(self, args):
         return subprocess.run(
             [sys.executable, str(SCRIPT), *args],
+            cwd=REPO_ROOT,
             capture_output=True,
             text=True,
             env=self.env,
@@ -56,9 +60,12 @@ class TestVexSessions(unittest.TestCase):
         self.assertEqual(payload["data"]["malformed_lines"], 1)
 
         db_path = self.home / "vex-sessions.db"
-        with sqlite3.connect(db_path) as conn:
+        conn = sqlite3.connect(db_path)
+        try:
             tables = {row[0] for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")}
-        self.assertTrue({"sessions", "events", "files_changed"}.issubset(tables))
+            self.assertTrue({"sessions", "events", "files_changed"}.issubset(tables))
+        finally:
+            conn.close()
 
     def test_list_filters_by_project(self):
         self.write_session()
@@ -101,3 +108,4 @@ class TestVexSessions(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

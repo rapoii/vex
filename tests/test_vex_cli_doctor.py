@@ -7,7 +7,7 @@ VEX_CLI = Path(__file__).parent.parent / "tools" / "vex.py"
 REPO_ROOT = Path(__file__).parent.parent
 
 def run_vex(*args):
-    return subprocess.run(["python", str(VEX_CLI), *args], capture_output=True, text=True)
+    return subprocess.run(["python", str(VEX_CLI), *args], cwd=REPO_ROOT, capture_output=True, text=True)
 
 def test_doctor_command():
     result = run_vex("doctor", "--json")
@@ -16,7 +16,7 @@ def test_doctor_command():
     assert data["ok"] is True
     assert data["command"] == "doctor"
     checks = {c["name"]: c["ok"] for c in data["data"]["checks"]}
-    
+
     # Assert new checks added
     expected_checks = [
         "claude_dir_exists",
