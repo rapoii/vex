@@ -421,3 +421,8 @@ For VEX builds:
 - Do not add telemetry by default.
 - Avoid paid-service dependencies in required paths.
 - Prefer explicit manifests over hidden conventions.
+
+## Pipeline
+
+**Previous:** (parallel work decision) — decision to split independent tasks across agents
+**Next:** [subagent-development](../subagent-development/SKILL.md) — execute approved plans through fresh subagents and review gates

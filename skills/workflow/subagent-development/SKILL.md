@@ -520,3 +520,8 @@ Remaining:
 ```
 
 Do not claim completion when validation or review failed.
+
+## Pipeline
+
+**Previous:** [dispatching-parallel-agents](../dispatching-parallel-agents/SKILL.md) — split independent work across coordinated agents
+**Next:** [code-review-flow](../code-review-flow/SKILL.md) — review diffs with severity ordering and actionable fixes

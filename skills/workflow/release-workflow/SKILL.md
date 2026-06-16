@@ -86,3 +86,8 @@ Require conventional commits (`feat:`, `fix:`, `chore:`) to auto-generate change
 ## Related Skills
 - `feature-development`: How features are built before they are bundled into a release.
 - `deployment-flow`: How the released artifact is delivered to servers.
+
+## Pipeline
+
+**Previous:** (release decision) — decision to cut release starts release flow
+**Next:** [deployment-flow](../deployment-flow/SKILL.md) — deploy release safely with health checks and rollback path

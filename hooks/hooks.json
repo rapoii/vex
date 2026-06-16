@@ -31,6 +31,18 @@
             "description": "Validate markdown frontmatter after edits"
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "name": "post-tool-use",
+            "profiles": ["standard", "strict"],
+            "command": "python hooks/scripts/post-tool-use.py",
+            "description": "Log VEX tool usage metadata"
+          }
+        ]
       }
     ],
     "Stop": [
@@ -38,9 +50,9 @@
         "hooks": [
           {
             "type": "command",
-            "name": "session-summary",
+            "name": "stop",
             "profiles": ["standard", "strict"],
-            "command": "python hooks/scripts/session-summary.py",
+            "command": "python hooks/scripts/stop.py",
             "description": "Summarize VEX session status"
           }
         ]

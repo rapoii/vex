@@ -124,3 +124,8 @@ Before re-requesting review:
 ## Related Skills
 - `pr-workflow`
 - `code-review-flow`
+
+## Pipeline
+
+**Previous:** [code-review-flow](../code-review-flow/SKILL.md) — review diffs with severity ordering and actionable fixes
+**Next:** [verification-before-completion](../verification-before-completion/SKILL.md) — prove claimed fixes with real evidence before completion

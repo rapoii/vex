@@ -93,3 +93,8 @@ When changing API responses, use versioning instead of breaking clients.
 ## Related Skills
 - `deployment-flow`: Managing the rollout of code that accompanies migrations.
 - `release-workflow`: Coordinating major version bumps.
+
+## Pipeline
+
+**Previous:** (migration requirement) — schema or data change starts migration flow
+**Next:** [code-review-flow](../code-review-flow/SKILL.md) — review diffs with severity ordering and actionable fixes

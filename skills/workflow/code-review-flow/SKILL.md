@@ -104,3 +104,8 @@ Categorize findings to guide action:
 - **Ignoring Context**: Reviewing a 5-line diff without looking at the surrounding 50 lines.
 - **Missing Security Flaws**: Assuming framework magic protects against everything. Always check inputs.
 - **Vague Feedback**: Saying "This looks wrong." Instead say: "This causes a memory leak because the event listener is never removed."
+
+## Pipeline
+
+**Previous:** [strict-tdd](../strict-tdd/SKILL.md) — enforce RED/GREEN/REFACTOR before production changes
+**Next:** [receiving-code-review](../receiving-code-review/SKILL.md) — process review feedback and resolve comments systematically

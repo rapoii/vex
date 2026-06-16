@@ -94,3 +94,8 @@ Implements the new user profile UI hidden behind the `ENABLE_NEW_PROFILE_UI` fla
 ## Related Skills
 - `deployment-flow`: How to deploy the code once merged.
 - `release-workflow`: How to tag and version the `main` branch.
+
+## Pipeline
+
+**Previous:** (feature request) — requested feature or product goal starts development flow
+**Next:** [code-review-flow](../code-review-flow/SKILL.md) — review diffs with severity ordering and actionable fixes

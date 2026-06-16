@@ -124,3 +124,8 @@ Do not use high-level planning tools or agents during execution unless replannin
 - `better-plan`
 - `tdd-workflow`
 - `refactor-flow`
+
+## Pipeline
+
+**Previous:** [worktree-isolation](../worktree-isolation/SKILL.md) — isolate implementation work on safe branch or worktree
+**Next:** [strict-tdd](../strict-tdd/SKILL.md) — enforce RED/GREEN/REFACTOR before production changes

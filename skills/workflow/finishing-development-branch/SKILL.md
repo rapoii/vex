@@ -377,3 +377,8 @@ For VEX:
 - Avoid destructive install behavior.
 - Do not add telemetry or paid-service dependencies.
 - Respect MIT/free-forever constraints.
+
+## Pipeline
+
+**Previous:** [verification-before-completion](../verification-before-completion/SKILL.md) — prove claimed fixes with real evidence before completion
+**Next:** (done) — workflow complete after final branch disposition

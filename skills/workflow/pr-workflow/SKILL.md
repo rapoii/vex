@@ -76,3 +76,8 @@ gh pr merge --squash --delete-branch
 - [ ] No merge conflicts.
 - [ ] All requested changes addressed.
 - [ ] Test coverage maintained or improved.
+
+## Pipeline
+
+**Previous:** (pull request need) — branch or PR readiness starts PR flow
+**Next:** [code-review-flow](../code-review-flow/SKILL.md) — review diffs with severity ordering and actionable fixes

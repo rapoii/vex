@@ -320,3 +320,8 @@ For installers and hooks:
 - Verify no unintended writes.
 - Verify Windows and POSIX path handling when practical.
 - Use security review before final success.
+
+## Pipeline
+
+**Previous:** [receiving-code-review](../receiving-code-review/SKILL.md) — process review feedback and resolve comments systematically
+**Next:** [finishing-development-branch](../finishing-development-branch/SKILL.md) — finish branch with verified state and explicit cleanup choices

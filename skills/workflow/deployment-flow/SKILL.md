@@ -96,3 +96,8 @@ Routes a small percentage of traffic (e.g., 5%) to the new version to monitor er
 ## Related Skills
 - `migration-workflow`: Ensuring database migrations align with zero-downtime deployment rules.
 - `release-workflow`: How artifacts are tagged before deployment.
+
+## Pipeline
+
+**Previous:** [release-workflow](../release-workflow/SKILL.md) — prepare version, changelog, tag, and release artifact
+**Next:** [verification-before-completion](../verification-before-completion/SKILL.md) — prove claimed fixes with real evidence before completion

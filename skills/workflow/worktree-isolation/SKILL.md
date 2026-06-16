@@ -408,3 +408,8 @@ Needs user decision:
 Do not hide dirty status.
 
 Do not call task complete until user-selected lifecycle action is clear.
+
+## Pipeline
+
+**Previous:** [brainstorming](../brainstorming/SKILL.md) — refine rough request into clear spec and acceptance criteria
+**Next:** [executing-plans](../executing-plans/SKILL.md) — execute approved plan in safe batches with checkpoints

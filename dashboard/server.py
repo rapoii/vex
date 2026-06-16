@@ -13,6 +13,7 @@ from flask import Flask, Response, jsonify, redirect, render_template, request
 PROJECT_ROOT = Path(os.path.abspath(__file__)).parent.parent
 AGENTS_DIR = PROJECT_ROOT / "agents"
 SKILLS_DIR = PROJECT_ROOT / "skills"
+COMMANDS_DIR = PROJECT_ROOT / "commands"
 CONTEXTS_DIR = PROJECT_ROOT / "contexts"
 RULES_DIR = PROJECT_ROOT / "rules"
 COST_LOG_PATH = Path.home() / ".claude" / "vex-costs.jsonl"
@@ -136,15 +137,17 @@ def list_skills() -> list[CatalogItem]:
 
         file_path = root_path / "SKILL.md"
         text = read_text_head(file_path)
-        title = root_path.name
-        description = ""
-        for line in text.splitlines():
-            stripped = line.strip()
-            if stripped.startswith("# "):
-                title = stripped[2:].strip()
-            elif stripped and not stripped.startswith("#"):
-                description = stripped[:200]
-                break
+        metadata, body = parse_frontmatter(text)
+        title = metadata.get("name", root_path.name)
+        description = metadata.get("description", "")
+        if not description:
+            for line in body.splitlines():
+                stripped = line.strip()
+                if stripped.startswith("# "):
+                    title = stripped[2:].strip()
+                elif stripped and not stripped.startswith("#"):
+                    description = stripped[:200]
+                    break
 
         category = root_path.parent.name if root_path.parent != SKILLS_DIR else "domain"
         skills.append(
@@ -162,23 +165,73 @@ def list_skills() -> list[CatalogItem]:
     return sorted(skills, key=lambda item: (item.category, item.name))
 
 
+def list_commands() -> list[CatalogItem]:
+    if not COMMANDS_DIR.is_dir():
+        return []
+
+    commands: list[CatalogItem] = []
+    for root, _, files in os.walk(COMMANDS_DIR):
+        root_path = Path(root)
+        for filename in files:
+            if not filename.endswith(".md"):
+                continue
+            file_path = root_path / filename
+            text = read_text_head(file_path)
+            metadata, body = parse_frontmatter(text)
+            commands.append(
+                CatalogItem(
+                    name=file_path.stem,
+                    category="command",
+                    path=str(file_path.relative_to(PROJECT_ROOT)),
+                    title=metadata.get("name", file_path.stem),
+                    description=metadata.get("description", "") or first_body_line(body),
+                    tools=(),
+                    size_bytes=file_path.stat().st_size,
+                )
+            )
+    return sorted(commands, key=lambda item: item.name)
+
+
+def list_rules() -> list[CatalogItem]:
+    if not RULES_DIR.is_dir():
+        return []
+
+    rules: list[CatalogItem] = []
+    for root, _, files in os.walk(RULES_DIR):
+        root_path = Path(root)
+        for filename in files:
+            if not filename.endswith(".md"):
+                continue
+            file_path = root_path / filename
+            text = read_text_head(file_path)
+            metadata, body = parse_frontmatter(text)
+            rules.append(
+                CatalogItem(
+                    name=file_path.stem,
+                    category="rule",
+                    path=str(file_path.relative_to(PROJECT_ROOT)),
+                    title=metadata.get("name", file_path.stem),
+                    description=metadata.get("description", "") or first_body_line(body),
+                    tools=(),
+                    size_bytes=file_path.stat().st_size,
+                )
+            )
+    return sorted(rules, key=lambda item: item.name)
+
+
 def list_memory_sources() -> list[CatalogItem]:
     items: list[CatalogItem] = []
-    for directory, category in ((CONTEXTS_DIR, "context"), (RULES_DIR, "rule")):
-        if not directory.is_dir():
-            continue
-
-        for root, _, files in os.walk(directory):
+    if CONTEXTS_DIR.is_dir():
+        for root, _, files in os.walk(CONTEXTS_DIR):
             for filename in files:
                 if not filename.endswith(".md"):
                     continue
-
                 file_path = Path(root) / filename
                 text = read_text_head(file_path)
                 items.append(
                     CatalogItem(
                         name=filename,
-                        category=category,
+                        category="context",
                         path=str(file_path.relative_to(PROJECT_ROOT)),
                         title=filename,
                         description=text.strip()[:300],
@@ -186,8 +239,22 @@ def list_memory_sources() -> list[CatalogItem]:
                         size_bytes=file_path.stat().st_size,
                     )
                 )
-
+    items.extend(list_rules())
     return sorted(items, key=lambda item: (item.category, item.name))
+
+
+def search_catalog(query: str) -> list[CatalogItem]:
+    normalized_query = query.strip().lower()[:100]
+    if not normalized_query:
+        return []
+
+    items = list_agents() + list_skills() + list_commands() + list_rules()
+    results: list[CatalogItem] = []
+    for item in items:
+        haystack = " ".join((item.name, item.title, item.description, item.path, item.category)).lower()
+        if normalized_query in haystack:
+            results.append(item)
+    return results[:50]
 
 
 def parse_cost_log() -> tuple[list[CostRecord], CostSummary]:
@@ -360,6 +427,11 @@ def create_app() -> Flask:
     @app.route("/skills")
     def skills_route() -> str:
         return render_template("skills.html", skills=list_skills())
+
+    @app.route("/search")
+    def search_route() -> str:
+        query = request.args.get("q", "")
+        return render_template("search_results.html", query=query.strip()[:100], results=search_catalog(query))
 
     @app.route("/costs")
     def costs_route() -> str:

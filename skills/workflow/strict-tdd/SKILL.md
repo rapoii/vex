@@ -353,3 +353,8 @@ Gaps:
 ```
 
 Never say "TDD done" without RED and GREEN evidence.
+
+## Pipeline
+
+**Previous:** [executing-plans](../executing-plans/SKILL.md) — execute approved plan in safe batches with checkpoints
+**Next:** [code-review-flow](../code-review-flow/SKILL.md) — review diffs with severity ordering and actionable fixes

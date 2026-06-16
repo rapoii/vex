@@ -6,6 +6,8 @@ import subprocess
 import sys
 import json
 import os
+import py_compile
+import shutil
 from pathlib import Path
 
 # Compute absolute paths
@@ -53,67 +55,105 @@ def cmd_status(args):
     print(f"Tools: {TOOLS_DIR}")
     return 0
 
+def add_check(checks, name, ok, detail=None, value=None):
+    check = {"name": name, "ok": bool(ok)}
+    if detail is not None:
+        check["detail"] = detail
+    if value is not None:
+        check["value"] = value
+    checks.append(check)
+    return bool(ok)
+
+
+def json_file_valid(path):
+    try:
+        with open(path, "r", encoding="utf-8") as file:
+            return True, json.load(file), "valid"
+    except Exception as error:
+        return False, None, str(error)
+
+
+def hook_script_paths(hooks_config):
+    paths = []
+    hooks = hooks_config.get("hooks", {}) if isinstance(hooks_config, dict) else {}
+    for entries in hooks.values():
+        if not isinstance(entries, list):
+            continue
+        for entry in entries:
+            for hook in entry.get("hooks", []) if isinstance(entry, dict) else []:
+                command = hook.get("command", "") if isinstance(hook, dict) else ""
+                parts = command.split()
+                for part in parts:
+                    if part.startswith("hooks/scripts/"):
+                        paths.append(REPO_ROOT / part)
+    return paths
+
+
+def count_files(directory, pattern):
+    if not directory.exists():
+        return 0
+    return sum(1 for path in directory.rglob(pattern) if path.is_file())
+
+
 def cmd_doctor(args):
     """Check VEX installation health."""
     is_json = getattr(args, "json", False)
 
     checks = []
     ok = True
-
     claude_dir = Path.home() / ".claude"
 
-    # 1. Check if .claude/ directory exists
-    has_claude_dir = claude_dir.exists()
-    checks.append({"name": "claude_dir_exists", "ok": has_claude_dir})
-    if not has_claude_dir: ok = False
-
-    # 2. Check if required files/dirs are present in ~/.claude/
-    required_paths = {
+    ok &= add_check(checks, "claude_dir_exists", claude_dir.exists())
+    for check_name, path in {
         "AGENTS_md_exists": "AGENTS.md",
         "skills_dir_exists": "skills",
         "commands_dir_exists": "commands",
         "rules_dir_exists": "rules",
-        "hooks_dir_exists": "hooks"
-    }
+        "hooks_dir_exists": "hooks",
+    }.items():
+        ok &= add_check(checks, check_name, (claude_dir / path).exists())
 
-    for check_name, path in required_paths.items():
-        has_path = (claude_dir / path).exists()
-        checks.append({"name": check_name, "ok": has_path})
-        if not has_path: ok = False
-
-    # 3. Check if Python tools are importable
-    tools_importable = True
-    try:
-        import argparse, json, os, sys, shutil, stat
-    except ImportError:
-        tools_importable = False
-    checks.append({"name": "python_tools_importable", "ok": tools_importable})
-    if not tools_importable: ok = False
-
-    # 4. Check if config files are valid JSON
+    ok &= add_check(checks, "python_tools_importable", True)
     config_valid = True
     for conf_file in ["settings.json", "plugin.json"]:
-        p = claude_dir / conf_file
-        if p.exists():
-            try:
-                with open(p, 'r') as f:
-                    json.load(f)
-            except Exception:
-                config_valid = False
-                break
-    checks.append({"name": "config_json_valid", "ok": config_valid})
-    if not config_valid: ok = False
+        path = claude_dir / conf_file
+        if path.exists():
+            valid, _, _ = json_file_valid(path)
+            config_valid &= valid
+    ok &= add_check(checks, "config_json_valid", config_valid)
+    ok &= add_check(checks, "config_dir", (REPO_ROOT / "config").exists())
+    add_check(checks, "claude_md", (REPO_ROOT / "CLAUDE.md").exists())
 
-    # Check config/manifests exist
-    config_dir = REPO_ROOT / "config"
-    has_config = config_dir.exists()
-    checks.append({"name": "config_dir", "ok": has_config})
-    if not has_config: ok = False
+    hooks_valid, hooks_config, hooks_detail = json_file_valid(REPO_ROOT / "hooks" / "hooks.json")
+    ok &= add_check(checks, "hooks_json_valid", hooks_valid, hooks_detail)
+    hook_paths = hook_script_paths(hooks_config or {})
+    missing_hooks = [str(path.relative_to(REPO_ROOT)) for path in hook_paths if not path.exists()]
+    ok &= add_check(checks, "hook_scripts_exist", not missing_hooks, ", ".join(missing_hooks) if missing_hooks else "all referenced scripts exist", len(hook_paths))
 
-    # Check if inside repo
-    claude_md = REPO_ROOT / "CLAUDE.md"
-    has_claude_md = claude_md.exists()
-    checks.append({"name": "claude_md", "ok": has_claude_md})
+    invalid_adapters = []
+    for path in sorted((REPO_ROOT / "adapters").glob("*.json")):
+        valid, _, detail = json_file_valid(path)
+        if not valid:
+            invalid_adapters.append(f"{path.name}: {detail}")
+    ok &= add_check(checks, "adapters_json_valid", not invalid_adapters, "; ".join(invalid_adapters) if invalid_adapters else "valid")
+
+    catalog_valid, _, catalog_detail = json_file_valid(REPO_ROOT / "marketplace" / "catalog.json")
+    ok &= add_check(checks, "marketplace_catalog_json_valid", catalog_valid, catalog_detail)
+
+    try:
+        py_compile.compile(str(REPO_ROOT / "dashboard" / "server.py"), doraise=True)
+        dashboard_ok = True
+        dashboard_detail = "syntax ok"
+    except py_compile.PyCompileError as error:
+        dashboard_ok = False
+        dashboard_detail = str(error)
+    ok &= add_check(checks, "dashboard_server_py_compile", dashboard_ok, dashboard_detail)
+
+    usage = shutil.disk_usage(REPO_ROOT)
+    add_check(checks, "disk_usage_available", True, "bytes", {"total": usage.total, "used": usage.used, "free": usage.free})
+    add_check(checks, "agents_count", True, value=count_files(REPO_ROOT / "agents", "*.md"))
+    add_check(checks, "skills_count", True, value=count_files(REPO_ROOT / "skills", "SKILL.md"))
+    add_check(checks, "rules_count", True, value=count_files(REPO_ROOT / "rules", "*.md"))
 
     data = {
         "ok": ok,
@@ -128,9 +168,9 @@ def cmd_doctor(args):
     print(f"\033[1;36mVEX Doctor\033[0m")
     for check in checks:
         icon = "✅" if check["ok"] else "❌"
-        # Determine status
         status = "OK" if check["ok"] else "ERROR"
-        print(f"{icon} [{status}] {check['name']}")
+        detail = f" — {check['detail']}" if "detail" in check else ""
+        print(f"{icon} [{status}] {check['name']}{detail}")
 
     return 0 if ok else 1
 

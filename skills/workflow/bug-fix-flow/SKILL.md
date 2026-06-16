@@ -84,3 +84,8 @@ Prove the fix works.
 - Clear caches (`rm -rf node_modules/.cache`, etc).
 - Check environment variables.
 - Verify dependency versions.
+
+## Pipeline
+
+**Previous:** (bug report) — defect report or failing behavior starts fix flow
+**Next:** [verification-before-completion](../verification-before-completion/SKILL.md) — prove claimed fixes with real evidence before completion

@@ -1,0 +1,18 @@
+{% if query %}
+    {% if results %}
+        <div class="card" style="margin-top: 1rem;">
+            <h3>Search results</h3>
+            <ul style="list-style: none; padding: 0; margin: 0;">
+                {% for item in results %}
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--color-border);">
+                        <div><span class="badge">{{ item.category }}</span> <strong>{{ item.title }}</strong></div>
+                        {% if item.description %}<p style="margin: 0.35rem 0;">{{ item.description }}</p>{% endif %}
+                        <code>{{ item.path }}</code>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <div class="card" style="margin-top: 1rem;">No results for <strong>{{ query }}</strong>.</div>
+    {% endif %}
+{% endif %}

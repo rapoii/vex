@@ -395,3 +395,8 @@ Escalate to architect when options change system boundaries.
 Escalate to security-reviewer when workflow touches auth, secrets, filesystem writes, subprocesses, or external calls.
 
 Escalate to tdd-guide or strict-tdd when behavior is ready for tests.
+
+## Pipeline
+
+**Previous:** (start) — begin workflow from unclear idea, feature, or problem
+**Next:** [worktree-isolation](../worktree-isolation/SKILL.md) — isolate implementation work on safe branch or worktree
