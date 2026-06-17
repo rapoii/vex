@@ -1,0 +1,61 @@
+{
+  "id": "factory-droid",
+  "name": "factory-droid",
+  "harness": "Factory Droid",
+  "version": "1.0.0",
+  "description": "Factory Droid adapter for VEX agents, skills, and rules.",
+  "fileMapping": {
+    "agents": "agents/",
+    "skills": "skills/",
+    "rules": "rules/"
+  },
+  "features": {
+    "agents": "full",
+    "skills": "full",
+    "rules": "full",
+    "hooks": "none",
+    "commands": "none",
+    "contexts": "none"
+  },
+  "featureSupport": {
+    "agents": {
+      "supported": true,
+      "level": "full",
+      "notes": "Copies VEX agent markdown files into Factory Droid agents directory."
+    },
+    "skills": {
+      "supported": true,
+      "level": "full",
+      "notes": "Copies VEX skill directories into Factory Droid skills directory."
+    },
+    "rules": {
+      "supported": true,
+      "level": "full",
+      "notes": "Copies VEX rule packs into Factory Droid rules directory."
+    },
+    "hooks": {
+      "supported": false,
+      "level": "none",
+      "notes": "Factory Droid hook integration is not defined in this adapter."
+    },
+    "commands": {
+      "supported": false,
+      "level": "none",
+      "notes": "Slash command translation is not defined in this adapter."
+    },
+    "contexts": {
+      "supported": false,
+      "level": "none",
+      "notes": "Context template translation is not defined in this adapter."
+    }
+  },
+  "install": {
+    "defaultTarget": "~/.factory-droid",
+    "commands": [
+      "python adapters/install_adapter.py install factory-droid --profile developer",
+      "python adapters/install_adapter.py install factory-droid --profile team",
+      "python adapters/install_adapter.py install factory-droid --dry-run"
+    ],
+    "notes": "Installs VEX agents, skills, and rules using Factory Droid directory layout. Use dry-run before writing files."
+  }
+}

@@ -172,7 +172,7 @@ def cmd_doctor(args):
 
     if is_json:
         print_json(data)
-        return 0 if ok else 1
+        return 0  # exit 0 = doctor ran; payload["ok"] indicates health
 
     print(f"\033[1;36mVEX Doctor\033[0m")
     for check in checks:

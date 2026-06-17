@@ -1,91 +1,73 @@
-# VEX Fix Plan v5 — MEDIUM Priority Gaps
+# VEX Fix Plan v6 — LOW Priority Gaps
 
 **Date:** 2026-06-16
-**Source:** Gap analysis v ECC
+**Source:** Gap analysis v ECC + Superpowers
 **Status:** EXECUTING
 
 ---
 
-## 11 MEDIUM Priority Gaps
+## LOW Priority Gaps (Doable)
 
-### 1. Multi-model commands
-- Create commands/multi-plan.md, multi-execute.md, multi-backend.md, multi-frontend.md, multi-workflow.md
-- Slash commands for multi-model collaborative workflows
+### 1. Systematic Debugging Skill [from Superpowers]
+- Create skills/workflow/systematic-debugging/SKILL.md
+- 4-phase root cause: reproduce → isolate → identify → fix
+- Defense-in-depth: fix root cause + add guardrails
+- 120+ lines
 
-### 2. Selective install
-- Update install.sh to support component selection
-- `--components agents,skills,rules` (comma-separated)
-- Install only listed components
+### 2. Harness Audit Scoring
+- Create tools/vex_audit.py — deterministic harness audit
+- Score: reliability, risk, coverage, security
+- CLI: python tools/vex_audit.py [--harness claude-code] [--json]
+- Check: hooks working, agents valid, skills complete, rules enforced
+- Output: score 0-100 per category + overall
 
-### 3. Session adapters
-- Enhance tools/vex_sessions.py with structured recording
-- Record: tool calls, file changes, cost per session
-- Export: JSON, CSV formats
+### 3. llms.txt — LLM Documentation
+- Create llms.txt at project root
+- Comprehensive LLM docs: what VEX is, how to use it, file structure, conventions
+- Machine-readable for LLMs consuming the repo
 
-### 4. Skill evolution
-- Enhance tools/vex_instinct.py — evolve already done
-- Add skill quality scoring based on usage data
-- Auto-promote high-performing instincts to skills
+### 4. Business/Content Skills
+- Create skills/reference/article-writing/SKILL.md — technical writing patterns
+- Create skills/reference/content-engine/SKILL.md — content generation workflow
 
-### 5. Package manager detection
-- Create tools/vex_detect.py — auto-detect package manager
-- Detect: npm, pnpm, yarn, bun, pip, poetry, cargo, go mod
-- Return: manager name, lockfile, install command
+### 5. Media/Video Skills  
+- Create skills/reference/video-production/SKILL.md — video creation with Manim, Remotion
 
-### 6. Orchestrator agents
-- Create agents/core/orchestrator.md — complex multi-step workflow
-- Create agents/core/orchestrator-backend.md — backend orchestration
-- Create agents/core/orchestrator-frontend.md — frontend orchestration
+### 6. Factory Droid Adapter
+- Create adapters/factory-droid.json — Factory Droid harness adapter
+- File mapping, feature support matrix
 
-### 7. Auto-format hooks
-- Create hooks/scripts/auto-format.py — PostToolUse auto-format
-- Detect file type, run appropriate formatter
-- JS/TS: prettier, Python: black, Go: gofmt, Rust: rustfmt
-
-### 8. Secret detection hooks
-- Create hooks/scripts/secret-scanner.py — beforeSubmitPrompt
-- Detect: sk-*, ghp_*, AKIA*, xoxb-*, -----BEGIN RSA PRIVATE KEY-----
-- Block if secrets found in prompt
-
-### 9. Session retention
-- Add to tools/vex_sessions.py: auto-prune sessions older than N days
-- Env var: VEX_SESSION_RETENTION_DAYS (default 30)
-- CLI: `vex sessions prune [--days 30]`
-
-### 10. Agent data home isolation
-- Add VEX_AGENT_DATA_HOME env var support
-- Isolate per-harness data (sessions, instincts, costs)
-- Update tools to respect env var
-
-### 11. Iterative retrieval pattern
-- Create skills/optimization/iterative-retrieval/SKILL.md
-- Progressive context refinement for subagents
-- Chunk → retrieve → refine → repeat
+### 7. Onboarding Skill [from Superpowers]
+- Create skills/meta/using-vex/SKILL.md — introduction to VEX system
+- How to install, configure, use agents/skills/hooks
 - 100+ lines
+
+### 8. NanoClaw-lite (Model Routing)
+- Create tools/vex_route.py — intelligent model routing
+- Route by task type: architecture→opus, coding→sonnet, exploration→haiku
+- CLI: python tools/vex_route.py --task "fix bug" --budget 0.50
+- Cost-aware routing
 
 ---
 
 ## Execution
 
-3 Claude Code workers:
+2 Claude Code workers:
 
-| Worker | Tasks | Count |
-|--------|-------|-------|
-| **Commands+Install** | multi-model commands (5), selective install, package detection | 7 |
-| **Hooks+Sessions** | auto-format, secret-scanner, session adapters, retention, data isolation | 5 |
-| **Agents+Skills** | orchestrator agents (3), iterative-retrieval skill, skill evolution | 4 |
+| Worker | Tasks |
+|--------|-------|
+| **Skills+Meta** | systematic-debugging, article-writing, content-engine, video-production, using-vex |
+| **Tools+Config** | vex_audit.py, vex_route.py, llms.txt, factory-droid adapter |
 
 ---
 
 ## Success Criteria
 
-- [ ] 5 multi-model command .md files
-- [ ] Selective install (--components flag)
-- [ ] Package manager detection tool
-- [ ] Auto-format hook script
-- [ ] Secret scanner hook script
-- [ ] Session adapters + retention
-- [ ] Data home isolation
-- [ ] 3 orchestrator agents
-- [ ] Iterative retrieval skill
+- [ ] systematic-debugging skill (120+ lines)
+- [ ] 3 new reference/meta skills
+- [ ] vex_audit.py — harness scoring
+- [ ] vex_route.py — model routing
+- [ ] llms.txt — machine-readable docs
+- [ ] factory-droid adapter
+- [ ] using-vex onboarding skill
 - [ ] 55+ tests pass

@@ -1,0 +1,132 @@
+# VEX LLM Documentation
+
+VEX is Vareva ECC Extended, a free MIT-licensed agent harness system for Claude Code first and other agent harnesses second. It packages reusable agents, skills, commands, rules, hooks, contexts, adapters, and tools so humans and LLM agents can install consistent workflows, quality gates, and project conventions without relying on paid services or hidden runtime behavior.
+
+## File structure
+
+agents/ contains agent definition markdown files.
+skills/ contains reusable workflow skills.
+commands/ contains slash command prompts and command metadata.
+rules/ contains always-on project and harness rules.
+hooks/ contains hook definitions, scripts, and templates.
+contexts/ contains context templates and memory scopes.
+config/ contains manifests, schemas, defaults, models, stacks, and profiles.
+tools/ contains TypeScript and Python implementation code.
+scripts/ contains validation, packaging, and release helpers.
+adapters/ contains harness adapter manifests and installer logic.
+tests/ contains Python and JavaScript validation tests.
+plan.md tracks current project execution planning.
+CLAUDE.md contains repository instructions for Claude Code.
+README.md explains user-facing install and project purpose.
+AGENTS.md explains orchestration and quality gates.
+SOUL.md states free-forever philosophy.
+
+## Agents
+
+Agents are markdown files under agents/.
+Each agent describes one specialized role.
+Read agent frontmatter before using agent body.
+Use agent triggers to decide whether agent applies.
+Use agent workflow steps as execution guidance.
+Use agent output format when returning results.
+Prefer specialized agents over general-purpose agents.
+Use planner agents for complex implementation plans.
+Use tdd-guide agents for features and bug fixes.
+Use code-reviewer agents after code changes.
+Use security-reviewer agents for auth, secrets, file writes, hooks, installers, external APIs, crypto, and payments.
+Keep agent definitions explicit and reproducible.
+Avoid hidden conventions not represented in manifests.
+
+## Skills
+
+Skills live under skills/.
+A skill usually exposes SKILL.md as entrypoint.
+Load SKILL.md before following a skill workflow.
+Follow trigger rules exactly.
+Do not invoke skills whose triggers do not match.
+Use skill validation steps before reporting completion.
+Skills should encode repeated workflows.
+Skills should not invent undocumented features.
+Skills should keep outputs short and structured.
+Project skills may override generic workflow behavior.
+When a slash command maps to a skill, use that skill.
+
+## Commands
+
+Commands live under commands/.
+Commands define user-facing slash command behavior.
+Commands should reference skills or tools when possible.
+Commands should keep metadata explicit.
+Commands should avoid side effects unless documented.
+Commands should be safe to inspect as plain markdown.
+
+## Rules
+
+Rules live under rules/.
+Common rules apply across stacks.
+Framework rules extend common rules.
+Language rules extend common rules.
+Rules should state requirements and enforcement.
+Rules should not duplicate codebase facts derivable from files.
+Rules should prefer minimal reversible changes.
+Rules should keep validation evidence visible.
+
+## Hooks
+
+Hooks live under hooks/.
+Hooks define automation around tool calls and sessions.
+Hooks must avoid destructive behavior by default.
+Hooks should include runtime controls.
+Runtime controls include timeouts, limits, allowlists, deny rules, dry-run modes, and clear exit behavior.
+Hook scripts should validate external input at boundaries.
+Hook scripts should avoid secrets in logs.
+Hook templates should be reproducible.
+Installer flows must request explicit confirmation before patching user files.
+
+## Configuration
+
+Configuration lives under config/.
+Adapter manifests live under adapters/.
+JSON config should be valid and machine-readable.
+Manifests are source of truth for harness-neutral behavior.
+Adapters translate manifests into harness-specific files.
+Profiles define install scope and defaults.
+Model config defines routing choices and cost assumptions.
+Stack config defines framework-specific rule packs.
+Environment variables should be documented near config that reads them.
+Tests must not require external credentials.
+Telemetry must not be enabled by default.
+Required paths must not depend on paid services.
+
+## Conventions
+
+Markdown is default authoring format.
+YAML frontmatter stores machine-readable metadata.
+Use lowercase kebab-case ids where possible.
+Use explicit names over inferred conventions.
+Keep generated files reproducible.
+Keep core files MIT-compatible.
+Prefer small cohesive files.
+Prefer stdlib-only Python for portable tools unless dependency is justified.
+Validate JSON before release.
+Validate adapters before release.
+Run tests before release.
+Keep CLAUDE.md under 200 lines.
+Keep README install steps current.
+Keep AGENTS.md orchestration guidance current.
+Keep SOUL.md philosophy stable.
+
+## LLM usage guidance
+
+Start by reading CLAUDE.md.
+Then inspect relevant agents, skills, rules, config, and adapters.
+Do not assume a file exists because docs mention it.
+Verify current paths before recommending commands.
+For implementation, prefer TDD when behavior changes.
+For security-sensitive edits, run security review.
+For changed code, run code review.
+For UI changes, run app and verify behavior.
+For installer changes, test dry-run behavior.
+For generator changes, verify reproducible output.
+For adapter changes, validate JSON and expected mappings.
+Return concise findings with file paths and line numbers when possible.

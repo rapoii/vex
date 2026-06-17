@@ -140,6 +140,7 @@ def detect_harnesses() -> list[dict[str, object]]:
         "copilot-cli": Path.cwd() / ".github" / "copilot-instructions.md",
         "opencode": Path.cwd() / ".opencode",
         "zed": Path.cwd() / ".zed",
+        "factory-droid": Path.home() / ".factory-droid",
     }
     return [{"id": key, "detected": value.exists(), "path": str(value)} for key, value in checks.items()]
 
